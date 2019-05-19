@@ -1,0 +1,246 @@
+.\" Copyright (c) 1985, 1990, 1993
+.\"	The Regents of the University of California.  All rights reserved.
+.\" Copyright (c) 2019 PostgreSQL Global Development Group
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"	@(#)pgstat.1	8.2 (Berkeley) 12/30/93
+.\"
+.Dd $Mdocdate: March 4 2019 $
+.Dt PGSTAT 1
+.Os
+.Sh NAME
+.Nm pgstat
+.Nd display PostgreSQL statistics
+.Sh SYNOPSIS
+.Nm pgstat
+.Op Ar option...
+.Op Ar view
+.Op Ar delay
+.Sh DESCRIPTION
+.Nm
+displays various PostgreSQL statistics in a screen-oriented fashion
+using the
+.Xr curses 3
+screen display library.
+.Pp
+While
+.Nm
+is running, the screen is divided into different areas.
+The top line displays the system time.
+The bottom line of the screen is reserved for
+user input and error messages.
+The information displayed in the rest of the screen
+comprises a
+.Em view ,
+and is the main interface for
+displaying different types of PostgreSQL statistics.
+The
+.Ic dbxact
+view is the default.
+.Pp
+Certain information may be discarded when the screen size is
+insufficient for display.
+For example, in an instance with 24 database the
+.Ic dbxact
+statistics displays only 21 databases on a 24 line terminal.
+.Pp
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl a
+Display all lines.
+.It Fl B
+Raw, non-interactive mode.
+The default is to exit after two screen updates,
+with statistics only ever displayed once.
+Useful for views such as
+.Ic cpu ,
+where initial calculations are useless.
+.It Fl b
+Raw, non-interactive mode.
+The default is to exit after one screen update,
+with statistics displayed every update.
+.It Fl C Ar count
+Exit after
+.Ar count
+screen updates.
+.It Fl d Ar dbname
+.Ar dbname
+Specifies the name of the database to connect to. This is equivalent to
+specifying dbname as the first non-option argument on the command line.
+
+If this parameter contains an = sign or starts with a valid URI prefix
+(postgresql:// or postgres://), it is treated as a conninfo string.
+.It Fl h Ar host
+.Ar host
+Specifies the host name of the machine on which the server is running. If the
+value begins with a slash, it is used as the directory for the Unix-domain
+socket.
+.It Fl i
+Interactive mode.
+.It Fl p Ar port
+.Ar port
+Specifies the TCP port or the local Unix-domain socket file extension on which
+the server is listening for connections. Defaults to the value of the PGPORT
+environment variable or, if not set, to the port specified at compile time,
+usually 5432.
+.It Fl s Ar delay
+Specifies the screen refresh time interval in seconds.
+This option is overridden by the final
+.Ar delay
+argument, if given.
+The default interval is 5 seconds.
+.It Fl U Ar username
+.Ar username
+Connect to the database as the user username instead of the default. (You must
+have permission to do so, of course.)
+.It Fl w Ar width
+Specifies the maximum width of the output in raw, non-interactive mode.
+.It Ar view
+The
+.Ar view
+argument expects to be one of:
+.Ic dbxact .
+These displays can also be requested interactively and are described in
+full detail below.
+.Ar view
+may be abbreviated to the minimum unambiguous prefix;
+for example,
+.Dq d
+for
+.Dq dbxact .
+.It Ar delay
+The
+.Ar delay
+argument specifies the screen refresh time interval in seconds.
+This is provided for backwards compatibility, and overrides any
+interval specified with the
+.Fl s
+flag.
+The default interval is 5 seconds.
+.El
+.Pp
+Certain characters cause immediate action by
+.Nm .
+These are:
+.Bl -tag -width Fl
+.It Ic \&:
+Move the cursor to the command line and interpret the input
+line typed as a command.
+While entering a command the
+current character erase, word erase, and line kill characters
+may be used.
+.It Ic o
+Select the next ordering which sorts the rows according to a
+combination of columns.
+Available orderings depend on the view.
+Not all views support orderings.
+.It Ic p
+Pause
+.Nm .
+.It Ic q
+Quit
+.Nm .
+.It Ic r
+Reverse the selected ordering if supported by the view.
+.It Ic \&,
+Print numbers with thousand separators, where applicable.
+.It Ic ^A | Aq Ic Home
+Jump to the beginning of the current view.
+.It Ic ^B | Aq Ic right arrow
+Select the previous view.
+.It Ic ^E | Aq Ic End
+Jump to the end of the current view.
+.It Ic ^F | Aq Ic left arrow
+Select the next view.
+.It Ic ^G
+Print the name of the current
+view being shown and the refresh interval.
+.It Ic ^L
+Refresh the screen.
+.It Ic ^N | Aq Ic down arrow
+Scroll current view down by one line.
+.It Ic ^P | Aq Ic up arrow
+Scroll current view up by one line.
+.It Ic ^V | Aq Ic Page Down
+Scroll current view down by one page.
+.It Ic Alt-V | Aq Ic Page Up
+Scroll current view up by one page.
+.It Ic ^Z
+Suspend
+.Nm .
+.El
+.Pp
+The following commands are interpreted by the
+.Dq global
+command interpreter.
+.Bl -tag -width Fl
+.It Ic help
+Print the names of the available views on the command line.
+.It Ic order
+Print the names of the available orderings on the command line.
+.It Ic quit
+Quit
+.Nm .
+(This may be abbreviated to
+.Ic q . )
+.It Ic stop
+Stop refreshing the screen.
+.It Xo
+.Op Ic start
+.Op Ar number
+.Xc
+Start (continue) refreshing the screen.
+If a second, numeric,
+argument is provided it is interpreted as a refresh interval
+(in seconds).
+Supplying only a number will set the refresh interval to this
+value.
+.El
+.Pp
+.Ar view
+may be abbreviated to the minimum unambiguous prefix.
+The available views are:
+.Bl -tag -width "dbxact"
+.It Ic dbxact
+Display database transaction statistics:
+.Bl -tag -compact -width "XACT_ROLLBACK" -offset indent
+.It DATABASE
+name of the database
+.It CONNECTIONS
+backends currently connected
+.It XACT_COMMIT
+transactions that have been committed
+.It XACT_ROLLBACK
+transactions that have been rolled back
+.It DEADLOCKS
+deadlocks detected
+.El
+.Sh SEE ALSO
+.Xr pg_top 1
+.Sh HISTORY
+The
+.Nm
+program was adapted from systat.

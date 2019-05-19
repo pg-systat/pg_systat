@@ -1,6 +1,6 @@
-/* $OpenBSD: engine.c,v 1.23 2019/01/17 05:56:29 tedu Exp $	 */
 /*
  * Copyright (c) 2001, 2007 Can Erkin Acar <canacar@openbsd.org>
+ * Copyright (c) 2019 PostgreSQL Global Development Group
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,11 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __linux__
+#include <bsd/stdlib.h>
+#include <bsd/string.h>
+#endif /* __linux__ */
+
 #include <term.h>
 #include <unistd.h>
 #include <err.h>
@@ -1345,6 +1350,10 @@ engine_loop(int countmax)
 	int count = 0;
 
 	for (;;) {
+
+		/* XXX forcing refresh by setting gotsig_alarm, but why??? */
+		gotsig_alarm = 1;
+
 		if (gotsig_alarm) {
 			read_view();
 			need_sort = 1;

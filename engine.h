@@ -1,6 +1,6 @@
-/* $OpenBSD: engine.h,v 1.11 2019/03/04 21:23:48 dlg Exp $	 */
 /*
  * Copyright (c) 2001, 2007 Can Erkin Acar <canacar@openbsd.org>
+ * Copyright (c) 2019 PostgreSQL Global Development Group
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

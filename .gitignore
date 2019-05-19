@@ -5,6 +5,8 @@ Makefile
 depcomp
 tags
 
+pgstat
+
 # cmake
 
 CMakeCache.txt

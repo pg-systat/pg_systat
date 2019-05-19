@@ -1,0 +1,14 @@
+pgstat displays various PostgreSQL statistics in a screen-oriented fashion.
+
+Installation from Source Code
+-----------------------------
+
+cmake CMakeLists.txt
+make
+make install
+
+
+Uninstalling
+------------
+
+xargs rm < install_manifest.txt

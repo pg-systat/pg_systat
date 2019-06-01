@@ -40,6 +40,7 @@
 void die(void);
 int print_header(void);
 int keyboard_callback(int);
+int initdbtup(void);
 int initdbxact(void);
 
 void error(const char *fmt, ...);

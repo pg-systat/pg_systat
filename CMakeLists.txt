@@ -50,6 +50,7 @@ check_function_exists(strchr HAVE_STRCHR)
 # Set appropriate compile flags.
 
 set_source_files_properties(
+    dbtup.c
     dbxact.c
     engine.c
     main.c
@@ -60,6 +61,7 @@ set_source_files_properties(
 
 add_executable(
     ${PROJECT_NAME}
+    dbtup.c
     dbxact.c
     engine.c
     main.c

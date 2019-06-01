@@ -386,7 +386,9 @@ initialize(void)
 {
 	engine_initialize();
 
+	/* Initialize in order to appear in interactive mode. */
 	initdbxact();
+	initdbtup();
 }
 
 int

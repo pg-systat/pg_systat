@@ -122,13 +122,15 @@ Specifies the maximum width of the output in raw, non-interactive mode.
 The
 .Ar view
 argument expects to be one of:
+.Ic dbtup ,
+or
 .Ic dbxact .
 These displays can also be requested interactively and are described in
 full detail below.
 .Ar view
 may be abbreviated to the minimum unambiguous prefix;
 for example,
-.Dq d
+.Dq dbx
 for
 .Dq dbxact .
 .It Ar delay
@@ -223,9 +225,27 @@ value.
 .Ar view
 may be abbreviated to the minimum unambiguous prefix.
 The available views are:
-.Bl -tag -width "dbxact"
+.Bl -tag -width "dbtupXXX"
+.It Ic dbtup
+Display database tuple statistics:
+.Pp
+.Bl -tag -compact -width "TUP_RETURNED" -offset indent
+.It DATABASE
+name of the database
+.It TUP_RETURNED
+rows returned by queries
+.It TUP_FETCHED
+rows fetched by queries
+.It TUP_INSERTED
+rows inserted by queries
+.It TUP_UPDATED
+rows updated by queries
+.It TUP_DELETED
+rows deleted by queries
+.El
 .It Ic dbxact
 Display database transaction statistics:
+.Pp
 .Bl -tag -compact -width "XACT_ROLLBACK" -offset indent
 .It DATABASE
 name of the database

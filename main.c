@@ -67,10 +67,11 @@
 
 #define TIMEPOS (80 - 8 - 20 - 1)
 #define PGSTRBUF 30
+#define DATABASE_NAME_MAX 63
+#define USER_NAME_MAX 32
+#define PORT_LEN 5
 
 double	naptime = 5.0;
-char    hostname[HOST_NAME_MAX+1];
-char	timebuf[26];
 
 void usage(void);
 
@@ -113,11 +114,21 @@ print_header(void)
 {
 	time_t now;
 	int start = dispstart + 1, end = dispstart + maxprint;
+
+	char header[MAX_LINE_BUF];
 	char pgstr[PGSTRBUF + 1] = "";
 	char tmpbuf[TIMEPOS];
-	char header[MAX_LINE_BUF];
+	char timebuf[26];
+	char database[DATABASE_NAME_MAX + 1] = "";
+	char hostname[HOST_NAME_MAX + 1] = "";
+	char username[USER_NAME_MAX + 1] = "";
+	char port[PORT_LEN + 1] = "";
 
 	PGresult	*pgresult = NULL;
+	const char	*pgdb;
+	const char	*pghost;
+	const char	*pgport;
+	const char	*pguser;
 
 	if (end > num_disp)
 		end = num_disp;
@@ -140,18 +151,34 @@ print_header(void)
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
 			snprintf(pgstr, sizeof(pgstr), "%s %s", PQgetvalue(pgresult, 0, 0),
 					PQgetvalue(pgresult, 1, 0));
+
+		pgdb = PQdb(options.connection);
+		if (pgdb && pgdb[0])
+			strncpy(database, pgdb, DATABASE_NAME_MAX);
+
+		pghost = PQhost(options.connection);
+		if (pghost && pghost[0])
+			strncpy(hostname, pghost, HOST_NAME_MAX);
+
+		pgport = PQport(options.connection);
+		if (pgport && pgport[0])
+			strncpy(port, pgport, PORT_LEN);
+
+		pguser = PQuser(options.connection);
+		if (pguser && pguser[0])
+			strncpy(username, pguser, USER_NAME_MAX);
 	}
 
 	if (num_disp && (start > 1 || end != num_disp))
 		snprintf(tmpbuf, sizeof(tmpbuf),
-				"%s (%u-%u of %u) %s", pgstr, start, end, num_disp,
-				paused ? "PAUSED" : "");
+				"(%u-%u of %u) %s%s", start, end, num_disp,
+				paused ? "PAUSED " : "", pgstr);
 	else
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s %s", pgstr,
-				paused ? "PAUSED" : "");
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s%s",
+				paused ? "PAUSED " : "", pgstr);
 		
-	snprintf(header, sizeof(header), "%-*s %19.19s %s", TIMEPOS - 1, tmpbuf,
-			hostname, timebuf);
+	snprintf(header, sizeof(header), "%s %s %s@%s:%s/%s", timebuf, tmpbuf,
+			username, hostname, port, database);
 
 	if (pgresult != NULL)
 		PQclear(pgresult);
@@ -493,8 +520,6 @@ main(int argc, char *argv[])
 		udelay = 1;
 
 	naptime = (double)udelay / 1000000.0;
-
-	gethostname(hostname, sizeof (hostname));
 
 	initialize();
 

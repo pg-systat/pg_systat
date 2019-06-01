@@ -51,6 +51,7 @@ check_function_exists(strchr HAVE_STRCHR)
 
 set_source_files_properties(
     dbblk.c
+    dbconfl.c
     dbtup.c
     dbxact.c
     engine.c
@@ -63,6 +64,7 @@ set_source_files_properties(
 add_executable(
     ${PROJECT_NAME}
     dbblk.c
+    dbconfl.c
     dbtup.c
     dbxact.c
     engine.c

@@ -248,6 +248,25 @@ temporary files created by queries
 data written to temporary files by queries
 .El
 .El
+.Bl -tag -width "dbconflXXX"
+.It Ic dbconfl
+Display database conflicts with recovery (applies only to standby servers)
+.Pp
+.Bl -tag -compact -width "TABLESPACE" -offset indent
+.It CONFLICTS
+queries canceled due to conflicts
+.It TABLESPACE
+queries canceled due to dropped tablespaces
+.It LOCK
+queries canceled due to lock timeouts
+.It SNAPSHOT
+queries canceled due to old snapshots
+.It BUFFERPIN
+queries canceled due to pinned buffers
+.It DEADLOCK
+queries canceled due to deadlocks
+.El
+.El
 .Bl -tag -width "dbtupXXX"
 .It Ic dbtup
 Display database tuple statistics:

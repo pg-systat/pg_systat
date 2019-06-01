@@ -225,6 +225,29 @@ value.
 .Ar view
 may be abbreviated to the minimum unambiguous prefix.
 The available views are:
+.Bl -tag -width "dbblkXXX"
+.It Ic dbblk
+Display database block statistics:
+.Pp
+.Bl -tag -compact -width "WRITE_TIME" -offset indent
+.It DATABASE
+name of the database
+.It READ
+disk blocks read
+.It HIT
+disk blocks found in the buffer cache, so that a read was not necessary (this
+only includes hits in the PostgreSQL buffer cache, not the operating system's
+file system cache)
+.It READ_TIME
+time spent reading data file blocks by backends, in milliseconds
+.It WRITE_TIME
+time spent writing data file blocks by backends, in milliseconds
+.It TEMP_FILES
+temporary files created by queries
+.It TEMP_BYTES
+data written to temporary files by queries
+.El
+.El
 .Bl -tag -width "dbtupXXX"
 .It Ic dbtup
 Display database tuple statistics:

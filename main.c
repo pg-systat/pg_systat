@@ -388,6 +388,7 @@ initialize(void)
 
 	/* Initialize in order to appear in interactive mode. */
 	initdbxact();
+	initdbblk();
 	initdbtup();
 }
 

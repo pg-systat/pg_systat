@@ -1,13 +1,14 @@
 *.sw?
 *.o
 .deps
-Makefile
 depcomp
 tags
 
 pgstat
 
 # cmake
+
+/_builds
 
 CMakeCache.txt
 CMakeFiles/

@@ -161,7 +161,7 @@ set(
 )
 set(
     CPACK_SOURCE_IGNORE_FILES
-    "${CPACK_SOURCE_IGNORE_FILES};/README\\\\.git\\$"
+    "${CPACK_SOURCE_IGNORE_FILES};/Makefile\\$"
 )
 
 include(CPack)

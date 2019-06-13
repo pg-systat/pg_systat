@@ -60,24 +60,29 @@ RB_GENERATE(dbtup, dbtup_t, entry, dbtupcmp)
 
 field_def fields_dbtup[] = {
 	{ "DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "TUP_RETURNED", 13, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TUP_FETCHED", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TUP_INSERTED", 13, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TUP_UPDATED", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TUP_DELETED", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "R/s", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "W/s", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "RETURNED", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "FETCHED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "INSERTED", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "UPDATED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "DELETED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 };
 
 #define FLD_DB_DATNAME       FIELD_ADDR(fields_dbtup, 0)
-#define FLD_DB_TUP_RETURNED  FIELD_ADDR(fields_dbtup, 1)
-#define FLD_DB_TUP_FETCHED   FIELD_ADDR(fields_dbtup, 2)
-#define FLD_DB_TUP_INSERTED  FIELD_ADDR(fields_dbtup, 3)
-#define FLD_DB_TUP_UPDATED   FIELD_ADDR(fields_dbtup, 4)
-#define FLD_DB_TUP_DELETED   FIELD_ADDR(fields_dbtup, 5)
+#define FLD_DB_TUP_R_S       FIELD_ADDR(fields_dbtup, 1)
+#define FLD_DB_TUP_W_S       FIELD_ADDR(fields_dbtup, 2)
+#define FLD_DB_TUP_RETURNED  FIELD_ADDR(fields_dbtup, 3)
+#define FLD_DB_TUP_FETCHED   FIELD_ADDR(fields_dbtup, 4)
+#define FLD_DB_TUP_INSERTED  FIELD_ADDR(fields_dbtup, 5)
+#define FLD_DB_TUP_UPDATED   FIELD_ADDR(fields_dbtup, 6)
+#define FLD_DB_TUP_DELETED   FIELD_ADDR(fields_dbtup, 7)
 
 /* Define views */
 field_def *view_dbtup_0[] = {
-	FLD_DB_DATNAME, FLD_DB_TUP_RETURNED, FLD_DB_TUP_FETCHED,
-	FLD_DB_TUP_INSERTED, FLD_DB_TUP_UPDATED, FLD_DB_TUP_DELETED, NULL
+	FLD_DB_DATNAME, FLD_DB_TUP_R_S, FLD_DB_TUP_W_S, FLD_DB_TUP_RETURNED,
+	FLD_DB_TUP_FETCHED, FLD_DB_TUP_INSERTED, FLD_DB_TUP_UPDATED,
+	FLD_DB_TUP_DELETED, NULL
 };
 
 order_type dbtup_order_list[] = {
@@ -230,6 +235,14 @@ print_dbtup(void)
 		do {
 			if (cur >= dispstart && cur < end) {
 				print_fld_str(FLD_DB_DATNAME, dbtups[i].datname);
+				print_fld_ssize(FLD_DB_TUP_R_S,
+						dbtups[i].tup_returned_diff /
+								((int64_t) udelay / 1000000));
+				print_fld_ssize(FLD_DB_TUP_W_S,
+						(dbtups[i].tup_inserted_diff +
+						dbtups[i].tup_updated_diff +
+						dbtups[i].tup_deleted_diff) /
+						((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_TUP_RETURNED,
 						dbtups[i].tup_returned_diff);
 				print_fld_ssize(FLD_DB_TUP_FETCHED,

@@ -275,18 +275,22 @@ queries canceled due to deadlocks
 .It Ic dbtup
 Display database tuple statistics:
 .Pp
-.Bl -tag -compact -width "TUP_RETURNED" -offset indent
+.Bl -tag -compact -width "RETURNED" -offset indent
 .It DATABASE
 name of the database
-.It TUP_RETURNED
+.It R/s
+FETCHED rows per second
+.It W/s
+rows modified (INSERTED + UPDATED + DELETED) per second
+.It RETURNED
 rows returned by queries
-.It TUP_FETCHED
+.It FETCHED
 rows fetched by queries
-.It TUP_INSERTED
+.It INSERTED
 rows inserted by queries
-.It TUP_UPDATED
+.It UPDATED
 rows updated by queries
-.It TUP_DELETED
+.It DELETED
 rows deleted by queries
 .El
 .It Ic dbxact

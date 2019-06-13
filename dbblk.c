@@ -65,25 +65,30 @@ RB_GENERATE(dbblk, dbblk_t, entry, dbblkcmp)
 field_def fields_dbblk[] = {
 	{ "DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
 	{ "READ", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "READ/s", 7, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 	{ "HIT", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "READ_TIME", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "WRITE_TIME", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TEMP_FILES", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TEMP_BYTES", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "HIT%", 5, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "R_TIME", 7, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "W_TIME", 7, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "TMP_FILES", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "TMP_BYTES", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 };
 
 #define FLD_DB_DATNAME        FIELD_ADDR(fields_dbblk, 0)
 #define FLD_DB_BLKS_READ      FIELD_ADDR(fields_dbblk, 1)
-#define FLD_DB_BLKS_HIT       FIELD_ADDR(fields_dbblk, 2)
-#define FLD_DB_BLK_READ_TIME  FIELD_ADDR(fields_dbblk, 3)
-#define FLD_DB_BLK_WRITE_TIME FIELD_ADDR(fields_dbblk, 4)
-#define FLD_DB_TEMP_FILES     FIELD_ADDR(fields_dbblk, 5)
-#define FLD_DB_TEMP_BYTES     FIELD_ADDR(fields_dbblk, 6)
+#define FLD_DB_BLKS_READ_RATE FIELD_ADDR(fields_dbblk, 2)
+#define FLD_DB_BLKS_HIT       FIELD_ADDR(fields_dbblk, 3)
+#define FLD_DB_BLKS_HIT_PER   FIELD_ADDR(fields_dbblk, 4)
+#define FLD_DB_BLK_READ_TIME  FIELD_ADDR(fields_dbblk, 5)
+#define FLD_DB_BLK_WRITE_TIME FIELD_ADDR(fields_dbblk, 6)
+#define FLD_DB_TEMP_FILES     FIELD_ADDR(fields_dbblk, 7)
+#define FLD_DB_TEMP_BYTES     FIELD_ADDR(fields_dbblk, 8)
 
 /* Define views */
 field_def *view_dbblk_0[] = {
-	FLD_DB_DATNAME, FLD_DB_BLKS_READ, FLD_DB_BLKS_HIT, FLD_DB_BLK_READ_TIME,
-	FLD_DB_BLK_WRITE_TIME, FLD_DB_TEMP_FILES, FLD_DB_TEMP_BYTES, NULL
+	FLD_DB_DATNAME, FLD_DB_BLKS_READ, FLD_DB_BLKS_READ_RATE, FLD_DB_BLKS_HIT,
+	FLD_DB_BLKS_HIT_PER, FLD_DB_BLK_READ_TIME, FLD_DB_BLK_WRITE_TIME,
+	FLD_DB_TEMP_FILES, FLD_DB_TEMP_BYTES, NULL
 };
 
 order_type dbblk_order_list[] = {
@@ -234,16 +239,26 @@ print_dbblk(void)
 {
 	int cur = 0, i;
 	int end = dispstart + maxprint;
+	int hit_per;
 
 	if (end > num_disp)
 		end = num_disp;
 
 	for (i = 0; i < dbblk_count; i++) {
 		do {
+			if (dbblks[i].blks_read_diff + dbblks[i].blks_hit_diff > 0)
+				hit_per = 100 * dbblks[i].blks_hit_diff /
+						(dbblks[i].blks_read_diff + dbblks[i].blks_hit_diff);
+			else
+				hit_per = 0;
 			if (cur >= dispstart && cur < end) {
 				print_fld_str(FLD_DB_DATNAME, dbblks[i].datname);
 				print_fld_uint(FLD_DB_BLKS_READ, dbblks[i].blks_read_diff);
+				print_fld_uint(FLD_DB_BLKS_READ_RATE,
+						dbblks[i].blks_read_diff /
+								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_BLKS_HIT, dbblks[i].blks_hit_diff);
+				print_fld_ssize(FLD_DB_BLKS_HIT_PER, hit_per);
 				print_fld_ssize(FLD_DB_BLK_READ_TIME,
 						dbblks[i].blk_read_time_diff);
 				print_fld_ssize(FLD_DB_BLK_WRITE_TIME,

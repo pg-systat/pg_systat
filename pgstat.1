@@ -229,22 +229,26 @@ The available views are:
 .It Ic dbblk
 Display database block statistics:
 .Pp
-.Bl -tag -compact -width "WRITE_TIME" -offset indent
+.Bl -tag -compact -width "TMP_BYTES" -offset indent
 .It DATABASE
 name of the database
 .It READ
 disk blocks read
+.It READ/s
+disk blocks read per second
 .It HIT
 disk blocks found in the buffer cache, so that a read was not necessary (this
 only includes hits in the PostgreSQL buffer cache, not the operating system's
 file system cache)
-.It READ_TIME
+.It HIT
+percentage of total (READ + HIT) blocks read from the PostgreSQL buffer cache
+.It R_TIME
 time spent reading data file blocks by backends, in milliseconds
-.It WRITE_TIME
+.It W_TIME
 time spent writing data file blocks by backends, in milliseconds
-.It TEMP_FILES
+.It TMP_FILES
 temporary files created by queries
-.It TEMP_BYTES
+.It TMP_BYTES
 data written to temporary files by queries
 .El
 .El

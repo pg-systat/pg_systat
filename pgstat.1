@@ -288,15 +288,19 @@ rows deleted by queries
 .It Ic dbxact
 Display database transaction statistics:
 .Pp
-.Bl -tag -compact -width "XACT_ROLLBACK" -offset indent
+.Bl -tag -compact -width "CONNECTIONS" -offset indent
 .It DATABASE
 name of the database
 .It CONNECTIONS
 backends currently connected
-.It XACT_COMMIT
+.It COMMIT
 transactions that have been committed
-.It XACT_ROLLBACK
+.It COMMIT/s
+committed transaction rate per second
+.It ROLLBACK
 transactions that have been rolled back
+.It ROLLBACK/s
+rolled back transaction rate per second
 .It DEADLOCKS
 deadlocks detected
 .El

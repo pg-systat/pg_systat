@@ -55,21 +55,26 @@ RB_GENERATE(dbxact, dbxact_t, entry, dbxactcmp)
 field_def fields_dbxact[] = {
 	{ "DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
 	{ "CONNECTIONS", 12, 12, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "XACT_COMMIT", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "XACT_ROLLBACK", 13, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "COMMITS", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "COMMITS/s", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "ROLLBACKS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "ROLLBACKS/s", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 	{ "DEADLOCKS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 };
 
 #define FLD_DB_DATNAME       FIELD_ADDR(fields_dbxact, 0)
 #define FLD_DB_NUMBACKENDS   FIELD_ADDR(fields_dbxact, 1)
 #define FLD_DB_XACT_COMMIT   FIELD_ADDR(fields_dbxact, 2)
-#define FLD_DB_XACT_ROLLBACK FIELD_ADDR(fields_dbxact, 3)
-#define FLD_DB_DEADLOCKS     FIELD_ADDR(fields_dbxact, 4)
+#define FLD_DB_XACT_COMMIT_RATE   FIELD_ADDR(fields_dbxact, 3)
+#define FLD_DB_XACT_ROLLBACK FIELD_ADDR(fields_dbxact, 4)
+#define FLD_DB_XACT_ROLLBACK_RATE   FIELD_ADDR(fields_dbxact, 5)
+#define FLD_DB_DEADLOCKS     FIELD_ADDR(fields_dbxact, 6)
 
 /* Define views */
 field_def *view_dbxact_0[] = {
 	FLD_DB_DATNAME, FLD_DB_NUMBACKENDS, FLD_DB_XACT_COMMIT,
-	FLD_DB_XACT_ROLLBACK, FLD_DB_DEADLOCKS, NULL
+	FLD_DB_XACT_COMMIT_RATE, FLD_DB_XACT_ROLLBACK, FLD_DB_XACT_ROLLBACK_RATE,
+	FLD_DB_DEADLOCKS, NULL
 };
 
 order_type dbxact_order_list[] = {
@@ -218,8 +223,14 @@ print_dbxact(void)
 				print_fld_uint(FLD_DB_NUMBACKENDS, dbxacts[i].numbackends);
 				print_fld_ssize(FLD_DB_XACT_COMMIT,
 						dbxacts[i].xact_commit_diff);
+				print_fld_ssize(FLD_DB_XACT_COMMIT_RATE,
+						dbxacts[i].xact_commit_diff /
+								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_XACT_ROLLBACK,
 						dbxacts[i].xact_rollback_diff);
+				print_fld_ssize(FLD_DB_XACT_ROLLBACK_RATE,
+						dbxacts[i].xact_rollback_diff /
+								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_DEADLOCKS, dbxacts[i].deadlocks_diff);
 				end_line();
 			}

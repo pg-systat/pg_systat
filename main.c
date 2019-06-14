@@ -70,6 +70,7 @@
 #define DATABASE_NAME_MAX 63
 #define USER_NAME_MAX 32
 #define PORT_LEN 5
+#define NUM_STRINGS 8
 
 double	naptime = 5.0;
 
@@ -373,6 +374,44 @@ cmd_count(const char *buf)
 		maxprint = lines - HEADER_LINES;
 }
 
+/*
+ * format_b(amt) - format a byte memory value, returning a string
+ *		suitable for display.  Returns a pointer to a static
+ *		area that changes each call.  "amt" is converted to a
+ *		string with a trailing "B".  If "amt" is 10000 or greater,
+ *		then it is formatted as megabytes (rounded) with a
+ *		trailing "K".  And so on...
+ */
+
+char *
+format_b(long long amt)
+
+{
+	static char retarray[NUM_STRINGS][16];
+	static int	index = 0;
+	register char *ret;
+	register char tag = 'B';
+
+	ret = retarray[index];
+	index = (index + 1) % NUM_STRINGS;
+
+	if (amt >= 10000) {
+		amt = (amt + 512) / 1024;
+		tag = 'K';
+		if (amt >= 10000) {
+			amt = (amt + 512) / 1024;
+			tag = 'B';
+			if (amt >= 10000) {
+				amt = (amt + 512) / 1024;
+				tag = 'G';
+			}
+		}
+	}
+
+	snprintf(ret, sizeof(retarray[index]) - 1, "%lld%c", amt, tag);
+
+	return (ret);
+}
 
 int
 keyboard_callback(int ch)

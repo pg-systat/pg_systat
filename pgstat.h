@@ -46,5 +46,6 @@ int initdbtup(void);
 int initdbxact(void);
 
 void error(const char *fmt, ...);
+char *format_b(long long);
 
 #endif /* _PGSTAT_H_ */

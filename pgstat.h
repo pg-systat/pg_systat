@@ -42,6 +42,7 @@ int print_header(void);
 int keyboard_callback(int);
 int initdbblk(void);
 int initdbconfl(void);
+int initdbfs(void);
 int initdbtup(void);
 int initdbxact(void);
 

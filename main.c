@@ -456,6 +456,7 @@ initialize(void)
 	initdbxact();
 	initdbblk();
 	initdbconfl();
+	initdbfs();
 	initdbtup();
 }
 

@@ -14,6 +14,14 @@ set(PROJECT_VERSION
     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+execute_process(
+    COMMAND uname -m
+    OUTPUT_VARIABLE ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+message("-- arch - ${ARCH}")
 
 # Get PostgreSQL include and library directories.
 
@@ -87,20 +95,15 @@ if(LIBM)
     target_link_libraries(${PROJECT_NAME} ${LIBM})
 endif(LIBM)
 
-find_library(LIBTERMCAP termcap)
-if(LIBTERMCAP)
-    target_link_libraries(${PROJECT_NAME} ${LIBTERMCAP})
-else(LIBTERMCAP)
-    find_library(LIBCURSES curses)
-    if(LIBCURSES)
-        target_link_libraries(${PROJECT_NAME} ${LIBCURSES})
-    else(LIBCURSES)
-        find_library(LIBNCURSES ncurses)
-        if(LIBNCURSES)
-            target_link_libraries(${PROJECT_NAME} ${LIBNCURSES})
-        endif(LIBNCURSES)
-    endif(LIBCURSES)
-endif(LIBTERMCAP)
+find_library(LIBCURSES curses)
+if(LIBCURSES)
+    target_link_libraries(${PROJECT_NAME} ${LIBCURSES})
+else(LIBCURSES)
+    find_library(LIBNCURSES ncurses)
+    if(LIBNCURSES)
+        target_link_libraries(${PROJECT_NAME} ${LIBNCURSES})
+    endif(LIBNCURSES)
+endif(LIBCURSES)
 
 find_library(LIBBSD bsd)
 if(LIBBSD)
@@ -167,3 +170,21 @@ set(
 )
 
 include(CPack)
+
+set(OUTPUT "${PROJECT_VERSION}")
+
+add_custom_target(appimage
+    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/AppRun AppDir
+    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pgstat.desktop AppDir
+    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pgstat.png AppDir
+    COMMAND mkdir -p AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pgstat | grep libpq.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pgstat | grep libtinfo.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pgstat | grep libncurses.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pgstat | grep libbsd.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND VERSION=${PROJECT_VERSION} appimagetool-${ARCH}.AppImage AppDir
+)

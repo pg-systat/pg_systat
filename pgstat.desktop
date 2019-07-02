@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=pgstat
+Exec=pgstat
+Icon=pgstat
+Type=Application
+Categories=Utility;Database;
+Terminal=true

@@ -459,6 +459,7 @@ initialize(void)
 	initdbfs();
 	initdbtup();
 	inittablescan();
+	inittabletup();
 }
 
 int

@@ -68,6 +68,7 @@ set_source_files_properties(
     pg.c
     sprompt.c
     tablescan.c
+    tabletup.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -83,6 +84,7 @@ add_executable(
     pg.c
     sprompt.c
     tablescan.c
+    tabletup.c
 )
 
 # Determine appropriate linker flags.

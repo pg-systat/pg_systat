@@ -328,6 +328,26 @@ number of index scans
 .It IDX_TUP_FETCH
 number of live rows fetched by index scans
 .El
+.It Ic tabletup
+Display table row modification statistics:
+.Bl -tag -compact -width "HOT_UPD" -offset indent
+.It SCHEMA
+schema name
+.It NAME
+table name
+.It INS
+rows inserted
+.It UPD
+rows updated (includes HOT updated rows)
+.It DEL
+rows deleted
+.It HOT_UPD
+rows HOT updated (i.e., with no separate index update required)
+.It LIVE
+estimated number of live rows
+.It DEAD
+estimated number of dead rows
+.El
 .Sh SEE ALSO
 .Xr pg_top 1
 .Sh HISTORY

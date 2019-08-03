@@ -67,6 +67,7 @@ set_source_files_properties(
     main.c
     pg.c
     sprompt.c
+    tableanalyze.c
     tablescan.c
     tabletup.c
     tablevac.c
@@ -84,6 +85,7 @@ add_executable(
     main.c
     pg.c
     sprompt.c
+    tableanalyze.c
     tablescan.c
     tabletup.c
     tablevac.c

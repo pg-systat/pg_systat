@@ -312,6 +312,24 @@ rolled back transaction rate per second
 .It DEADLOCKS
 deadlocks detected
 .El
+.It Ic tableanalyze
+Display table analyze statistics:
+.Bl -tag -compact -width "N_MOD_SINCE_ANALYZED" -offset indent
+.It SCHEMA
+schema name
+.It NAME
+table name
+.It N_MOD_SINCE_ANALYZE
+estimated number of rows modified since this table was last analyzed
+.It LAST_ANALYZE
+last time this table was manually vacuumed (not counting VACUUM FULL)
+.It LAST_AUTOANALYZE
+last time this table was vacuumed by the autovacuum daemon
+.It ANALYZE_COUNT
+number of times this table has been manually vacuumed (not counting VACUUM FULL)
+.It AUTOANALYZE_COUNT
+number of times this table has been vacuumed by the autovacuum daemon
+.El
 .It Ic tablescan
 Display table and index scan statistics:
 .Bl -tag -compact -width "IDX_TUP_FETCH" -offset indent

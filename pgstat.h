@@ -45,6 +45,7 @@ int initdbconfl(void);
 int initdbfs(void);
 int initdbtup(void);
 int initdbxact(void);
+int inittableanalyze(void);
 int inittablescan(void);
 int inittabletup(void);
 int inittablevac(void);

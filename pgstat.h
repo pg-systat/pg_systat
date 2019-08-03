@@ -47,6 +47,7 @@ int initdbtup(void);
 int initdbxact(void);
 int inittablescan(void);
 int inittabletup(void);
+int inittablevac(void);
 
 void error(const char *fmt, ...);
 char *format_b(long long);

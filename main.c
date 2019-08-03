@@ -460,6 +460,7 @@ initialize(void)
 	initdbtup();
 	inittablescan();
 	inittabletup();
+	inittablevac();
 }
 
 int

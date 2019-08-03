@@ -348,6 +348,22 @@ estimated number of live rows
 .It DEAD
 estimated number of dead rows
 .El
+.It Ic tablevac
+Display table vacuum statistics:
+.Bl -tag -compact -width "AUTOVACUUM_COUNT" -offset indent
+.It SCHEMA
+schema name
+.It NAME
+table name
+.It LAST_VACUUM
+last time this table was manually vacuumed (not counting VACUUM FULL)
+.It LAST_AUTOVACUUM
+last time this table was vacuumed by the autovacuum daemon
+.It VACUUM_COUNT
+number of times this table has been manually vacuumed (not counting VACUUM FULL)
+.It AUTOVACUUM_COUNT
+number of times this table has been vacuumed by the autovacuum daemon
+.El
 .Sh SEE ALSO
 .Xr pg_top 1
 .Sh HISTORY

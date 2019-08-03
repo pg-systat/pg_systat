@@ -8,6 +8,8 @@
 #include <libpq-fe.h>
 #include "pg_config_manual.h"
 
+#define TIMESTAMPLEN 29
+
 enum pgparams
 {
 	PG_HOST,

@@ -4,7 +4,7 @@
 depcomp
 tags
 
-pgstat
+pg_systat
 
 # cmake
 

@@ -12,7 +12,7 @@
 #include <signal.h>
 
 #include "pg.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 
 #define QUERY_STAT_INDEXES \
 		"SELECT indexrelid, schemaname, relname, indexrelname, idx_scan,\n" \

@@ -12,7 +12,7 @@
 #include <signal.h>
 
 #include "pg.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 
 #define QUERY_STAT_DBCONFL \
 		"SELECT a.datid, a.datname, conflicts, confl_tablespace,\n" \

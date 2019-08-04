@@ -1,4 +1,4 @@
-pgstat displays various PostgreSQL statistics in a screen-oriented fashion.
+pg_systat displays various PostgreSQL statistics in a screen-oriented fashion.
 
 Installation from Source Code
 -----------------------------

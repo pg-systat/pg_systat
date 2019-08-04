@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=pgstat
-Exec=pgstat
-Icon=pgstat
+Name=pg_systat
+Exec=pg_systat
+Icon=pg_systat
 Type=Application
 Categories=Utility;Database;
 Terminal=true

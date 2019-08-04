@@ -12,7 +12,7 @@
 #include <signal.h>
 
 #include "pg.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 
 #define QUERY_STAT_TABLES \
 		"SELECT relid, schemaname, relname, seq_scan, seq_tup_read,\n" \

@@ -12,7 +12,7 @@
 #include <signal.h>
 
 #include "pg.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 
 #define QUERY_STAT_DBBLK \
 		"SELECT datid, datname, blks_read, blks_hit, temp_files,\n" \

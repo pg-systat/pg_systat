@@ -15,7 +15,7 @@
 #include <errno.h>
 
 #include "pg.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 
 #define QUERY_STAT_DBFS \
 		"SELECT spcname,\n" \

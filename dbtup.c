@@ -12,7 +12,7 @@
 #include <signal.h>
 
 #include "pg.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 
 #define QUERY_STAT_DBTUP \
 		"SELECT datid, datname, tup_returned, tup_fetched, tup_inserted,\n" \

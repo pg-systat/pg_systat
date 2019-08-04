@@ -61,7 +61,7 @@
 #include <sys/time.h>
 
 #include "engine.h"
-#include "pgstat.h"
+#include "pg_systat.h"
 #include "pg.h"
 #include "port.h"
 

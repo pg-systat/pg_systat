@@ -1,4 +1,4 @@
 * The dbfs view gets filesystem data through the stafs() system call so it only
-  checks the system pgstat is running on.  This won't be useful if connected to
-  a remote database unless the database can provide similar information.
+  checks the system pg_systat is running on.  This won't be useful if connected
+  to a remote database unless the database can provide similar information.
   Perhaps this functionality can be added to pg_proctab.

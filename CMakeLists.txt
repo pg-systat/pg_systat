@@ -5,7 +5,7 @@ include(CheckLibraryExists)
 include(CheckIncludeFiles)
 include(CheckCSourceCompiles)
 
-project(pgstat C)
+project(pg_systat C)
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
@@ -127,7 +127,7 @@ install(
 )
 install(
     FILES
-    ${CMAKE_SOURCE_DIR}/pgstat.1
+    ${CMAKE_SOURCE_DIR}/pg_systat.1
     DESTINATION "share/man/man1"
 )
 
@@ -136,8 +136,8 @@ install(
 include(InstallRequiredSystemLibraries)
 
 set(CPACK_SOURCE_GENERATOR "TBZ2;TXZ;ZIP")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "pgstat is 'systat' for PostgreSQL")
-set(CPACK_PACKAGE_VENDOR "pgstat")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "pg_systat is 'systat' for PostgreSQL")
+set(CPACK_PACKAGE_VENDOR "pg_systat")
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
@@ -185,16 +185,16 @@ set(OUTPUT "${PROJECT_VERSION}")
 
 add_custom_target(appimage
     COMMAND cp -aL ${CMAKE_SOURCE_DIR}/AppRun AppDir
-    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pgstat.desktop AppDir
-    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pgstat.png AppDir
+    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pg_systat.desktop AppDir
+    COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pg_systat.png AppDir
     COMMAND mkdir -p AppDir/usr/lib
     COMMAND cp -aL
-            `ldd pgstat | grep libpq.so | cut -d \" \" -f 3` AppDir/usr/lib
+            `ldd pg_systat | grep libpq.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND cp -aL
-            `ldd pgstat | grep libtinfo.so | cut -d \" \" -f 3` AppDir/usr/lib
+            `ldd pg_systat | grep libtinfo.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND cp -aL
-            `ldd pgstat | grep libncurses.so | cut -d \" \" -f 3` AppDir/usr/lib
+            `ldd pg_systat | grep libncurses.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND cp -aL
-            `ldd pgstat | grep libbsd.so | cut -d \" \" -f 3` AppDir/usr/lib
+            `ldd pg_systat | grep libbsd.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND VERSION=${PROJECT_VERSION} appimagetool-${ARCH}.AppImage AppDir
 )

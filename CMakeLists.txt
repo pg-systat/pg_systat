@@ -64,6 +64,7 @@ set_source_files_properties(
     dbtup.c
     dbxact.c
     engine.c
+    index.c
     main.c
     pg.c
     sprompt.c
@@ -82,6 +83,7 @@ add_executable(
     dbtup.c
     dbxact.c
     engine.c
+    index.c
     main.c
     pg.c
     sprompt.c

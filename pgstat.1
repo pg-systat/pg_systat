@@ -312,6 +312,22 @@ rolled back transaction rate per second
 .It DEADLOCKS
 deadlocks detected
 .El
+.It Ic index
+Display index statistics:
+.Bl -tag -compact -width "IDX_TUP_FETCH" -offset indent
+.It SCHEMA
+schema name
+.It INDEXNAME
+index name
+.It TABLENAME
+table name
+.It IDX_SCAN
+number of index scans initiated on this index
+.It IDX_TUP_READ
+number of index entries returned by scans on this index
+.It IDX_TUP_FETCH
+number of live table rows fetched by simple index scans using this index
+.El
 .It Ic tableanalyze
 Display table analyze statistics:
 .Bl -tag -compact -width "N_MOD_SINCE_ANALYZED" -offset indent

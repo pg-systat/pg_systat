@@ -346,6 +346,18 @@ number of times this table has been manually vacuumed (not counting VACUUM FULL)
 .It AUTOANALYZE_COUNT
 number of times this table has been vacuumed by the autovacuum daemon
 .El
+.It Ic tableioheap
+Display table heap I/O statistics:
+.Bl -tag -compact -width "HEAP_BLKS_HIT" -offset indent
+.It SCHEMA
+schema name
+.It NAME
+table name
+.It HEAP_BLKS_READ
+disk blocks read from this table
+.It HEAP_BLKS_HIT
+buffer hits in this table
+.El
 .It Ic tablescan
 Display table and index scan statistics:
 .Bl -tag -compact -width "IDX_TUP_FETCH" -offset indent

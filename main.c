@@ -460,6 +460,7 @@ initialize(void)
 	initdbtup();
 	initindex();
 	inittableanalyze();
+	inittableioheap();
 	inittablescan();
 	inittabletup();
 	inittablevac();

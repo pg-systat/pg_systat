@@ -358,6 +358,18 @@ disk blocks read from this table
 .It HEAP_BLKS_HIT
 buffer hits in this table
 .El
+.It Ic tableioidx
+Display table index I/O statistics:
+.Bl -tag -compact -width "IDX_BLKS_HIT" -offset indent
+.It SCHEMA
+schema name
+.It NAME
+table name
+.It IDX_BLKS_READ
+disk blocks read from all indexes on this table
+.It IDX_BLKS_HIT
+buffer hits in all indexes on this table
+.El
 .It Ic tablescan
 Display table and index scan statistics:
 .Bl -tag -compact -width "IDX_TUP_FETCH" -offset indent

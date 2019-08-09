@@ -70,6 +70,7 @@ set_source_files_properties(
     sprompt.c
     tableanalyze.c
     tableioheap.c
+    tableioidx.c
     tablescan.c
     tabletup.c
     tablevac.c
@@ -90,6 +91,7 @@ add_executable(
     sprompt.c
     tableanalyze.c
     tableioheap.c
+    tableioidx.c
     tablescan.c
     tabletup.c
     tablevac.c

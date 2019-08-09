@@ -6,6 +6,12 @@ tags
 
 pg_systat
 
+# cscope
+
+cscope.po.out
+cscope.in.out
+cscope.out
+
 # cmake
 
 /_builds

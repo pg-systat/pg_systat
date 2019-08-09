@@ -462,6 +462,7 @@ initialize(void)
 	inittableanalyze();
 	inittableioheap();
 	inittableioidx();
+	inittableiotoast();
 	inittablescan();
 	inittabletup();
 	inittablevac();

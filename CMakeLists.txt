@@ -105,6 +105,11 @@ if(LIBM)
     target_link_libraries(${PROJECT_NAME} ${LIBM})
 endif(LIBM)
 
+find_library(LIBTINFO tinfo)
+if(LIBTINFO)
+	target_link_libraries(${PROJECT_NAME} ${LIBTINFO})
+endif(LIBTINFO)
+
 find_library(LIBCURSES curses)
 if(LIBCURSES)
     target_link_libraries(${PROJECT_NAME} ${LIBCURSES})

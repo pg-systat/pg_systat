@@ -370,6 +370,18 @@ disk blocks read from all indexes on this table
 .It IDX_BLKS_HIT
 buffer hits in all indexes on this table
 .El
+.It Ic tableiotidx
+Display toast table index I/O statistics:
+.Bl -tag -compact -width "TIDX_BLKS_HIT" -offset indent
+.It SCHEMA
+schema name
+.It NAME
+table name
+.It TIDX_BLKS_READ
+disk blocks read from this table's TOAST table indexes (if any)
+.It TIDX_BLKS_HIT
+ of buffer hits in this table's TOAST table indexes (if any)
+.El
 .It Ic tableiotoast
 Display toast table I/O statistics:
 .Bl -tag -compact -width "TOAST_BLKS_HIT" -offset indent

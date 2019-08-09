@@ -71,6 +71,7 @@ set_source_files_properties(
     tableanalyze.c
     tableioheap.c
     tableioidx.c
+    tableiotidx.c
     tableiotoast.c
     tablescan.c
     tabletup.c
@@ -93,6 +94,7 @@ add_executable(
     tableanalyze.c
     tableioheap.c
     tableioidx.c
+    tableiotidx.c
     tableiotoast.c
     tablescan.c
     tabletup.c

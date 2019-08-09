@@ -49,6 +49,7 @@ int initindex(void);
 int inittableanalyze(void);
 int inittableioheap(void);
 int inittableioidx(void);
+int inittableiotidx(void);
 int inittableiotoast(void);
 int inittablescan(void);
 int inittabletup(void);

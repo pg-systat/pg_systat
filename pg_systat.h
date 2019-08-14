@@ -46,6 +46,7 @@ int initdbfs(void);
 int initdbtup(void);
 int initdbxact(void);
 int initindex(void);
+int initindexio(void);
 int inittableanalyze(void);
 int inittableioheap(void);
 int inittableioidx(void);

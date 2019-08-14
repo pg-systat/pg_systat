@@ -459,6 +459,7 @@ initialize(void)
 	initdbfs();
 	initdbtup();
 	initindex();
+	initindexio();
 	inittableanalyze();
 	inittableioheap();
 	inittableioidx();

@@ -65,6 +65,7 @@ set_source_files_properties(
     dbxact.c
     engine.c
     index.c
+    indexio.c
     main.c
     pg.c
     sprompt.c
@@ -88,6 +89,7 @@ add_executable(
     dbxact.c
     engine.c
     index.c
+    indexio.c
     main.c
     pg.c
     sprompt.c

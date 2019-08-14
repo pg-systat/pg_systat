@@ -328,6 +328,20 @@ number of index entries returned by scans on this index
 .It IDX_TUP_FETCH
 number of live table rows fetched by simple index scans using this index
 .El
+.It Ic indexio
+Display index I/O statistics:
+.Bl -tag -compact -width "IDX_TUP_FETCH" -offset indent
+.It SCHEMA
+schema name
+.It INDEXNAME
+index name
+.It TABLENAME
+table name
+.It IDX_BLKS_READ
+disk blocks read from this index
+.It IDX_BLKS_HIT
+buffer hits in this index
+.El
 .It Ic tableanalyze
 Display table analyze statistics:
 .Bl -tag -compact -width "N_MOD_SINCE_ANALYZED" -offset indent

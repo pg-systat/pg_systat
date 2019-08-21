@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2019 PostgreSQL Global Development Group-->
+<component type="desktop-application">
+  <id>org.postgresql.pg_systat</id>
+  <metadata_license>PostgreSQL</metadata_license>
+  <project_license>PostgreSQL</project_license>
+  <name>pg_systat</name>
+  <summary>'systat' for PostgreSQL>
+
+  <description>
+    <p>
+	  pg_systat is a terminal program used to view PostgreSQL statistics
+      tables.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">org.postgresql.pg_systat</launchable>
+
+  <screenshots>
+   <screenshot type="default">
+      <caption>Screenshot</caption>
+      <image>https://gitlab.com/pg_systat/pg_systat/wikis/uploads/1b05ce3d9e8a53d29a1a9e0db81a53a3/pg_systat-dbxact.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://gitlab.com/pg_systat/pg_systat</url>
+  <project_group>PostgreSQL</project_group>
+
+  <provides>
+    <binary>pg_systat</binary>
+  </provides>
+
+  <releases>
+    <release version="1.0alpha1" date="1.0alpha1">
+      <description>
+        <p>1.0 Alpha 1 release, the very first release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

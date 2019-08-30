@@ -47,7 +47,7 @@ RB_GENERATE(dbfs, dbfs_t, entry, dbfscmp)
 field_def fields_dbfs[] = {
 	{ "TABLESPACE", 11, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
 	{ "PATH", 5, PATH_MAX, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "USED", 5, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "SIZE", 5, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 	{ "AVAILABLE", 10, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 	{ "%USED", 6, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 };
@@ -67,7 +67,7 @@ field_def *view_dbfs_0[] = {
 order_type dbfs_order_list[] = {
 	{"tablespace", "tablespace", 't', sort_dbfs_spcname_callback},
 	{"path", "path", 'p', sort_dbfs_path_callback},
-	{"used", "used", 'u', sort_dbfs_path_callback},
+	{"size", "size", 'u', sort_dbfs_path_callback},
 	{"available", "available", 'a', sort_dbfs_path_callback},
 	{NULL, NULL, 0, NULL}
 };

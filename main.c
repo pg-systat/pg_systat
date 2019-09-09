@@ -468,6 +468,7 @@ initialize(void)
 	inittablescan();
 	inittabletup();
 	inittablevac();
+	initvacuum();
 }
 
 int

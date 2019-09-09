@@ -77,6 +77,7 @@ set_source_files_properties(
     tablescan.c
     tabletup.c
     tablevac.c
+    vacuum.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -101,6 +102,7 @@ add_executable(
     tablescan.c
     tabletup.c
     tablevac.c
+    vacuum.c
 )
 
 # Determine appropriate linker flags.

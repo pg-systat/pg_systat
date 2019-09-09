@@ -30,6 +30,10 @@ connect_to_db()
 		for (i = 0; i < 5; i++)
 			if (options.values[i] != NULL)
 				free((void *) options.values[i]);
+
+	PQexec(options.connection,
+			"SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL " \
+			"READ UNCOMMITTED;");
 }
 
 void

@@ -29,6 +29,7 @@ struct dbfs_t
 	char spcname[NAMEDATALEN + 1];
 	char path[PATH_MAX];
 	struct statfs buf;
+	struct statfs buf_prev;
 };
 
 int dbfscmp(struct dbfs_t *, struct dbfs_t *);
@@ -50,6 +51,7 @@ field_def fields_dbfs[] = {
 	{ "SIZE", 5, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 	{ "AVAILABLE", 10, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 	{ "%USED", 6, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+	{ "CHANGE", 7, 6, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
 };
 
 #define FLD_DBFS_SPCNAME     FIELD_ADDR(fields_dbfs, 0)
@@ -57,11 +59,12 @@ field_def fields_dbfs[] = {
 #define FLD_DBFS_BLOCKS      FIELD_ADDR(fields_dbfs, 2)
 #define FLD_DBFS_BAVAIL      FIELD_ADDR(fields_dbfs, 3)
 #define FLD_DBFS_BLOCKS_PER  FIELD_ADDR(fields_dbfs, 4)
+#define FLD_DBFS_CHANGE      FIELD_ADDR(fields_dbfs, 5)
 
 /* Define views */
 field_def *view_dbfs_0[] = {
 	FLD_DBFS_SPCNAME, FLD_DBFS_PATH, FLD_DBFS_BLOCKS, FLD_DBFS_BAVAIL,
-	FLD_DBFS_BLOCKS_PER, NULL
+	FLD_DBFS_BLOCKS_PER, FLD_DBFS_CHANGE, NULL
 };
 
 order_type dbfs_order_list[] = {
@@ -136,6 +139,7 @@ dbfs_info(void)
 		}
 		strncpy(n->path, PQgetvalue(pgresult, i, 1), PATH_MAX);
 
+		memcpy(&n->buf_prev, &n->buf, sizeof(struct statfs));
 		if (statfs(n->path, &n->buf) != 0)
 			error("%s statfs error: %d", n->path, errno);
 
@@ -194,6 +198,10 @@ print_dbfs(void)
 
 	for (i = 0; i < dbfs_count; i++) {
 		do {
+			long long avail = dbfss[i].buf.f_bavail * dbfss[i].buf.f_bsize;
+			long long avail_prev = dbfss[i].buf_prev.f_bavail *
+					dbfss[i].buf_prev.f_bsize;
+
 			unsigned int blocks_per;
 			blocks_per = dbfss[i].buf.f_blocks == 0 ? 1 :
 					100 * (dbfss[i].buf.f_blocks - dbfss[i].buf.f_bavail) /
@@ -205,10 +213,9 @@ print_dbfs(void)
 				print_fld_str(FLD_DBFS_BLOCKS,
 						format_b(dbfss[i].buf.f_blocks *
 								dbfss[i].buf.f_bsize));
-				print_fld_str(FLD_DBFS_BAVAIL,
-						format_b(dbfss[i].buf.f_bavail *
-								dbfss[i].buf.f_bsize));
+				print_fld_str(FLD_DBFS_BAVAIL, format_b(avail));
 				print_fld_uint(FLD_DBFS_BLOCKS_PER, blocks_per);
+				print_fld_str(FLD_DBFS_CHANGE, format_b(avail_prev - avail));
 				end_line();
 			}
 			if (++cur >= end)

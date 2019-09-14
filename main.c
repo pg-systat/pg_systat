@@ -391,9 +391,15 @@ format_b(long long amt)
 	static int	index = 0;
 	register char *ret;
 	register char tag = 'B';
+	long long neg = 1;
 
 	ret = retarray[index];
 	index = (index + 1) % NUM_STRINGS;
+
+	if (amt < 0) {
+		amt *= -1;
+		neg = -1;
+	}
 
 	if (amt >= 10000) {
 		amt = (amt + 512) / 1024;
@@ -408,7 +414,7 @@ format_b(long long amt)
 		}
 	}
 
-	snprintf(ret, sizeof(retarray[index]) - 1, "%lld%c", amt, tag);
+	snprintf(ret, sizeof(retarray[index]) - 1, "%lld%c", amt * neg, tag);
 
 	return (ret);
 }

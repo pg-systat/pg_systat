@@ -14,7 +14,7 @@ cscope.out
 
 # cmake
 
-/_builds
+/build
 
 CMakeCache.txt
 CMakeFiles/

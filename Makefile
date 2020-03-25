@@ -2,24 +2,24 @@ default:
 	@echo "targets: appimage (Linux only), clean, debug, package, release"
 
 appimage:
-	cmake -H. -B_builds/appimage -DCMAKE_INSTALL_PREFIX=/usr
-	cd _builds/appimage && make
-	cd _builds/appimage && sed -i -e 's#/usr#././#g' pg_systat
-	cd _builds/appimage && make install DESTDIR=AppDir
-	cd _builds/appimage && make appimage
+	cmake -H. -Bbuild/appimage -DCMAKE_INSTALL_PREFIX=/usr
+	cd build/appimage && make
+	cd build/appimage && sed -i -e 's#/usr#././#g' pg_systat
+	cd build/appimage && make install DESTDIR=AppDir
+	cd build/appimage && make appimage
 
 clean:
-	-rm -rf _builds
+	-rm -rf build
 
 debug:
-	cmake -H. -B_builds/debug -DCMAKE_BUILD_TYPE=Debug
-	cd _builds/debug && make
+	cmake -H. -Bbuild/debug -DCMAKE_BUILD_TYPE=Debug
+	cd build/debug && make
 
 package:
-	git checkout-index --prefix=_builds/source/ -a
-	cmake -H_builds/source -B_builds/source
-	cd _builds/source && make package_source
+	git checkout-index --prefix=build/source/ -a
+	cmake -Hbuild/source -Bbuild/source
+	cd build/source && make package_source
 
 release:
-	cmake -H. -B_builds/release
-	cd _builds/release && make
+	cmake -H. -Bbuild/release
+	cd build/release && make

@@ -9,7 +9,7 @@ project(pg_systat C)
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
-set(PROJECT_VERSION_PATCH "0-alpha1")
+set(PROJECT_VERSION_PATCH "0-alpha2")
 set(PROJECT_VERSION
     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
@@ -215,5 +215,21 @@ add_custom_target(appimage
             `ldd pg_systat | grep libncurses.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND cp -aL
             `ldd pg_systat | grep libbsd.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libssl.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libcrypto.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libgssapi_krb5.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libkrb5.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libk5crypto.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libkrb5support.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libkeyutils.so | cut -d \" \" -f 3` AppDir/usr/lib
+    COMMAND cp -aL
+            `ldd pg_systat | grep libselinux.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND VERSION=${PROJECT_VERSION} appimagetool-${ARCH}.AppImage AppDir
 )

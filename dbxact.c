@@ -15,8 +15,8 @@
 #include "pg_systat.h"
 
 #define QUERY_STAT_DBXACT \
-		"SELECT datid, datname, numbackends, xact_commit, xact_rollback,\n" \
-		"       deadlocks\n" \
+		"SELECT datid, coalesce(datname, '<shared object relations>'),\n" \
+		"       numbackends, xact_commit, xact_rollback, deadlocks\n" \
 		"FROM pg_stat_database;"
 
 struct dbxact_t

@@ -15,8 +15,9 @@
 #include "pg_systat.h"
 
 #define QUERY_STAT_DBBLK \
-		"SELECT datid, datname, blks_read, blks_hit, temp_files,\n" \
-	   	"       temp_bytes, blk_read_time, blk_write_time\n" \
+		"SELECT datid, coalesce(datname, '<shared relation objects>'),\n" \
+		"       blks_read, blks_hit, temp_files, temp_bytes,\n" \
+		"       blk_read_time, blk_write_time\n" \
 		"FROM pg_stat_database;"
 
 struct dbblk_t

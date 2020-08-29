@@ -149,7 +149,7 @@ install(
 )
 install(
     FILES
-    ${CMAKE_SOURCE_DIR}/pg_systat.1
+    ${CMAKE_BINARY_DIR}/pg_systat.1
     DESTINATION "share/man/man1"
 )
 

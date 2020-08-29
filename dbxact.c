@@ -15,7 +15,7 @@
 #include "pg_systat.h"
 
 #define QUERY_STAT_DBXACT \
-		"SELECT datid, coalesce(datname, '<shared object relations>'),\n" \
+		"SELECT datid, coalesce(datname, '<shared relation objects>'),\n" \
 		"       numbackends, xact_commit, xact_rollback, deadlocks\n" \
 		"FROM pg_stat_database;"
 

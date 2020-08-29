@@ -15,7 +15,7 @@
 #include "pg_systat.h"
 
 #define QUERY_STAT_DBTUP \
-		"SELECT datid, coalesce(datname, '<shared object relations>'),\n" \
+		"SELECT datid, coalesce(datname, '<shared relation objects>'),\n" \
 		"       tup_returned, tup_fetched, tup_inserted, tup_updated,\n" \
 		"       tup_deleted\n" \
 		"FROM pg_stat_database;"

@@ -31,9 +31,9 @@
   </provides>
 
   <releases>
-    <release version="1.0alpha1" date="1.0alpha1">
+    <release version="1.0beta1" date="1.0beta1">
       <description>
-        <p>1.0 Alpha 1 release, the very first release.</p>
+        <p>1.0 Beta 1 release, the very first release.</p>
       </description>
     </release>
   </releases>

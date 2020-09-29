@@ -5,7 +5,7 @@
   <metadata_license>PostgreSQL</metadata_license>
   <project_license>PostgreSQL</project_license>
   <name>pg_systat</name>
-  <summary>'systat' for PostgreSQL>
+  <summary>'systat' for PostgreSQL</summary>
 
   <description>
     <p>

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+which docker > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "docker is not in your path"
+	exit 1
+fi
+
+DOCKER_DIR=`dirname $0`
+DOCKER_DIR=`readlink -f $DOCKER_DIR`
+
+DOCKER_TAG="pg_systat-appimage"
+
+# Use the return code from `docker inspect` to determine if the docker image
+# needs to be created.
+docker inspect $DOCKER_TAG > /dev/null
+if [ $? -ne 0 ]; then
+	${DOCKER_DIR}/appimage-prepare || exit 1
+fi
+
+UID=`id -u`
+GID=`id -g`
+
+# Remove CMakeCache.txt before and after creating the AppImage because it may
+# not agree between the Docker and host environments.
+rm -rf ${DOCKER_DIR}/../CMakeCache.txt || exit 1
+docker run --rm -v ${DOCKER_DIR}/..:/usr/local/src/pg_systat:rw \
+		-w /usr/local/src/pg_systat -u ${UID}:${GID} $DOCKER_TAG \
+		make appimage-docker
+rm -rf ${DOCKER_DIR}/../CMakeCache.txt

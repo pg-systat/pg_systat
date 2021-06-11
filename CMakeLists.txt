@@ -13,8 +13,8 @@ set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION
     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
-set(CMAKE_C_FLAGS "-Wall")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_C_FLAGS_DEBUG "-Wall")
 
 execute_process(
     COMMAND uname -m
@@ -205,7 +205,7 @@ include(CPack)
 
 set(OUTPUT "${PROJECT_VERSION}")
 
-add_custom_target(appimage
+add_custom_target(appimage-prep
     COMMAND cp -aL ${CMAKE_SOURCE_DIR}/AppRun AppDir
     COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pg_systat.desktop AppDir
     COMMAND cp -aL ${CMAKE_SOURCE_DIR}/pg_systat.png AppDir
@@ -236,5 +236,14 @@ add_custom_target(appimage
             `ldd pg_systat | grep libkeyutils.so | cut -d \" \" -f 3` AppDir/usr/lib
     COMMAND cp -aL
             `ldd pg_systat | grep libselinux.so | cut -d \" \" -f 3` AppDir/usr/lib
+)
+
+add_custom_target(appimage
     COMMAND VERSION=${PROJECT_VERSION} appimagetool-${ARCH}.AppImage AppDir
 )
+add_dependencies(appimage appimage-prep)
+
+add_custom_target(appimage-docker
+    COMMAND VERSION=${PROJECT_VERSION} /usr/local/squashfs-root/AppRun --comp=xz AppDir
+)
+add_dependencies(appimage-docker appimage-prep)

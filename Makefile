@@ -1,5 +1,5 @@
 default:
-	@echo "targets: appimage (Linux only), clean, debug, package, release"
+	@echo "targets: appimage (Linux only), clean, debug, manpage, package, release"
 
 appimage-prep:
 	# There is something about the Docker CentOS 6 image such that the linking
@@ -23,6 +23,10 @@ clean:
 debug:
 	cmake -H. -Bbuild/debug -DCMAKE_BUILD_TYPE=Debug
 	cd build/debug && make
+
+manpage:
+	cmake -Hman -Bbuild/manpage
+	cd build/manpage && make manpage
 
 package:
 	git checkout-index --prefix=build/source/ -a

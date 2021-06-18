@@ -137,20 +137,10 @@ if(LIBBSD)
     target_link_libraries(${PROJECT_NAME} ${LIBBSD})
 endif(LIBBSD)
 
-execute_process(
-    COMMAND rst2man.py ${CMAKE_SOURCE_DIR}/pg_systat.1.rst
-    OUTPUT_FILE ${CMAKE_BINARY_DIR}/pg_systat.1
-)
-
 install(
     PROGRAMS
     ${CMAKE_BINARY_DIR}/${PROJECT_NAME}
     DESTINATION "bin"
-)
-install(
-    FILES
-    ${CMAKE_BINARY_DIR}/pg_systat.1
-    DESTINATION "share/man/man1"
 )
 
 # CPack rules for creating distribution files.

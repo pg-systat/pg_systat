@@ -274,6 +274,16 @@ views are:
   :AUTOVACUUM_COUNT: number of times this table has been vacuumed by the
                      autovacuum daemon
 
+:stmtplan: Display statement plan statistics:
+
+  :QUERYID: internal hash code for query
+  :PLANS: number of times the statement was planned
+  :TOTAL_PLAN_TIME: total time spent planning the statement
+  :MIN_PLAN_TIME: minimum time spent planning the statement
+  :MAX_PLAN_TIME: maximum time spent planning the statement
+  :MEAN_PLAN_TIME: mean time spent planning the statement
+  :STDDEV_PLAN_TIME: population standard deviation of time spent planning the statement
+
 SEE ALSO
 ========
 

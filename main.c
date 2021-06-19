@@ -475,6 +475,7 @@ initialize(void)
 	inittabletup();
 	inittablevac();
 	initvacuum();
+	initstmtplan();
 }
 
 int

@@ -56,6 +56,7 @@ int inittablescan(void);
 int inittabletup(void);
 int inittablevac(void);
 int initvacuum(void);
+int initstmtplan(void);
 
 void error(const char *fmt, ...);
 char *format_b(long long);

@@ -284,6 +284,16 @@ views are:
   :MEAN_PLAN_TIME: mean time spent planning the statement
   :STDDEV_PLAN_TIME: population standard deviation of time spent planning the statement
 
+:stmtexec: Display statement execute statistics:
+
+  :QUERYID: internal hash code for query
+  :CALLS: number of times the statement was executed
+  :TOTAL_EXEC_TIME: total time spent executing the statement
+  :MIN_EXEC_TIME: minimum time spent executing the statement
+  :MAX_EXEC_TIME: maximum time spent executing the statement
+  :MEAN_EXEC_TIME: mean time spent executing the statement
+  :STDDEV_EXEC_TIME: population standard deviation of time spent executing the statement
+
 SEE ALSO
 ========
 

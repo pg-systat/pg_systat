@@ -79,6 +79,7 @@ set_source_files_properties(
     tablevac.c
     vacuum.c
     stmtplan.c
+    stmtexec.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -105,6 +106,7 @@ add_executable(
     tablevac.c
     vacuum.c
     stmtplan.c
+    stmtexec.c
 )
 
 # Determine appropriate linker flags.

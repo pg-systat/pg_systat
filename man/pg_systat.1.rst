@@ -303,6 +303,15 @@ views are:
   :SHARED_BLK_DIRTIED: total number of shared blocks dirtied by the statement
   :SHARED_BLK_WRITTEN: total number of shared blocks written by the statement
 
+:stmtlocalblk: Display statement local block statistics:
+
+  :QUERYID: internal hash code for query
+  :ROWS: total number of rows retrieved or affected by the statement
+  :LOCAL_BLK_HIT: total number of local block cache hits by the statement
+  :LOCAL_BLK_READ: total number of local blocks read by the statement
+  :LOCAL_BLK_DIRTIED: total number of local blocks dirtied by the statement
+  :LOCAL_BLK_WRITTEN: total number of local blocks written by the statement
+
 SEE ALSO
 ========
 

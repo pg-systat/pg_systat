@@ -80,6 +80,7 @@ set_source_files_properties(
     vacuum.c
     stmtplan.c
     stmtexec.c
+    stmtsharedblk.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -107,6 +108,7 @@ add_executable(
     vacuum.c
     stmtplan.c
     stmtexec.c
+    stmtsharedblk.c
 )
 
 # Determine appropriate linker flags.

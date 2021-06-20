@@ -58,6 +58,7 @@ int inittablevac(void);
 int initvacuum(void);
 int initstmtplan(void);
 int initstmtexec(void);
+int initstmtsharedblk(void);
 
 void error(const char *fmt, ...);
 char *format_b(long long);

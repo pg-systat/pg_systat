@@ -294,6 +294,15 @@ views are:
   :MEAN_EXEC_TIME: mean time spent executing the statement
   :STDDEV_EXEC_TIME: population standard deviation of time spent executing the statement
 
+:stmtsharedblk: Display statement shared block statistics:
+
+  :QUERYID: internal hash code for query
+  :ROWS: total number of rows retrieved or affected by the statement
+  :SHARED_BLK_HIT: total number of shared block cache hits by the statement
+  :SHARED_BLK_READ: total number of shared blocks read by the statement
+  :SHARED_BLK_DIRTIED: total number of shared blocks dirtied by the statement
+  :SHARED_BLK_WRITTEN: total number of shared blocks written by the statement
+
 SEE ALSO
 ========
 

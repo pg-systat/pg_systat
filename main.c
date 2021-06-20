@@ -477,6 +477,7 @@ initialize(void)
 	initvacuum();
 	initstmtplan();
 	initstmtexec();
+	initstmtsharedblk();
 }
 
 int

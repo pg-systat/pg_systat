@@ -61,6 +61,7 @@ int initstmtexec(void);
 int initstmtsharedblk(void);
 int initstmtlocalblk(void);
 int initstmttempblk(void);
+int initstmtwal(void);
 
 void error(const char *fmt, ...);
 char *format_b(long long);

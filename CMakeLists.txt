@@ -83,6 +83,7 @@ set_source_files_properties(
     stmtsharedblk.c
     stmtlocalblk.c
     stmttempblk.c
+    stmtwal.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -113,6 +114,7 @@ add_executable(
     stmtsharedblk.c
     stmtlocalblk.c
     stmttempblk.c
+    stmtwal.c
 )
 
 # Determine appropriate linker flags.

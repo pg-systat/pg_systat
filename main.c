@@ -480,6 +480,7 @@ initialize(void)
 	initstmtsharedblk();
 	initstmtlocalblk();
 	initstmttempblk();
+	initstmtwal();
 }
 
 int

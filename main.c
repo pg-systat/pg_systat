@@ -479,6 +479,7 @@ initialize(void)
 	initstmtexec();
 	initstmtsharedblk();
 	initstmtlocalblk();
+	initstmttempblk();
 }
 
 int

@@ -312,6 +312,15 @@ views are:
   :LOCAL_BLK_DIRTIED: total number of local blocks dirtied by the statement
   :LOCAL_BLK_WRITTEN: total number of local blocks written by the statement
 
+:stmttempblk: Display statement temp block and time spent statistics:
+
+  :QUERYID: internal hash code for query
+  :ROWS: total number of rows retrieved or affected by the statement
+  :TEMP_BLK_READ: total number of temp blocks read by the statement
+  :TEMP_BLK_WRITTEN: total number of temp blocks written by the statement
+  :BLK_READ_TIME: total time the statement spent reading blocks
+  :BLK_WRITE_TIME: total time the statement spent writing blocks
+
 SEE ALSO
 ========
 

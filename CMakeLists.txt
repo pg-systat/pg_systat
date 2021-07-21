@@ -84,6 +84,7 @@ set_source_files_properties(
     stmtlocalblk.c
     stmttempblk.c
     stmtwal.c
+    copyprogress.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -115,6 +116,7 @@ add_executable(
     stmtlocalblk.c
     stmttempblk.c
     stmtwal.c
+    copyprogress.c
 )
 
 # Determine appropriate linker flags.

@@ -62,6 +62,7 @@ int initstmtsharedblk(void);
 int initstmtlocalblk(void);
 int initstmttempblk(void);
 int initstmtwal(void);
+int initcopyprogress(void);
 
 void error(const char *fmt, ...);
 char *format_b(long long);

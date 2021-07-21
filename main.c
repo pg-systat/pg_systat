@@ -481,6 +481,7 @@ initialize(void)
 	initstmtlocalblk();
 	initstmttempblk();
 	initstmtwal();
+    initcopyprogress();
 }
 
 int

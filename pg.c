@@ -43,3 +43,12 @@ disconnect_from_db()
 		return;
 	PQfinish(options.connection);
 }
+
+int
+pg_version()
+{
+	connect_to_db();
+	int version = PQserverVersion(options.connection) / 100;
+	disconnect_from_db();
+	return version;
+}

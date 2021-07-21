@@ -14,10 +14,16 @@
 #include "pg.h"
 #include "pg_systat.h"
 
-#define QUERY_STAT_EXEC \
+#define QUERY_STAT_EXEC_13 \
 		"SELECT queryid, calls, total_exec_time, min_exec_time, max_exec_time,\n" \
 		"       mean_exec_time, stddev_exec_time\n" \
 		"FROM pg_stat_statements;"
+
+#define QUERY_STAT_EXEC_12 \
+		"SELECT queryid, calls, total_time, min_time, max_time,\n" \
+		"       mean_time, stddev_time\n" \
+		"FROM pg_stat_statements;"
+
 
 struct stmtexec_t
 {
@@ -29,7 +35,7 @@ struct stmtexec_t
 	double min_exec_time;
 	double max_exec_time;
 	double mean_exec_time;
-	double stddev_exec_time; 
+	double stddev_exec_time;
 
 };
 
@@ -114,8 +120,13 @@ stmtexec_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
-		pgresult = PQexec(options.connection, QUERY_STAT_EXEC);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+        if( PQserverVersion(options.connection) / 100 < 1300){
+		    pgresult = PQexec(options.connection, QUERY_STAT_EXEC_12);
+		} else {
+		    pgresult = PQexec(options.connection, QUERY_STAT_EXEC_13);
+        }
+
+        if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmtexec_count;
 			stmtexec_count = PQntuples(pgresult);
 		}
@@ -349,7 +360,7 @@ sort_stmtexec_mean_exec_time_callback(const void *v1, const void *v2)
 	return sort_stmtexec_queryid_callback(v1, v2);
 }
 
-int 
+int
 sort_stmtexec_stddev_exec_time_callback(const void *v1, const void *v2)
 {
 	struct stmtexec_t *n1, *n2;

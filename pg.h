@@ -30,5 +30,6 @@ extern struct adhoc_opts options;
 
 void connect_to_db();
 void disconnect_from_db();
+int pg_version();
 
 #endif /* _PG_H_ */

@@ -168,6 +168,10 @@ read_stmtwal(void)
 int
 initstmtwal(void)
 {
+    if (pg_version() < 1300 ) {
+        return 0;
+    }
+
 	field_view	*v;
 
 	stmtwals = NULL;

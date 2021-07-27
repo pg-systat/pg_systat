@@ -484,6 +484,7 @@ initialize(void)
 	initstmtwal();
   initcopyprogress();
   initbuffercacherel();
+  initbuffercachestat();
 }
 
 int

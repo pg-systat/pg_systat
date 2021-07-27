@@ -87,6 +87,7 @@ set_source_files_properties(
     stmtwal.c
     copyprogress.c
     buffercacherel.c
+    buffercachestat.c
     PROPERTIES COMPILE_FLAGS "${PGINCLUDE}"
 )
 
@@ -120,6 +121,7 @@ add_executable(
     stmtwal.c
     copyprogress.c
     buffercacherel.c
+    buffercachestat.c
 )
 
 # Determine appropriate linker flags.

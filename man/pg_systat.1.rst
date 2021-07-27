@@ -361,6 +361,13 @@ views are:
   :RELFORKNUMBER: fork number within the relation
   :RELBLOCKNUMBER: page number within the relation
 
+:buffercacherel: Display buffer cache state statistics:
+
+  :BUFFERID: ID, in the range 1..shared_buffers
+  :ISDIRTY: Is the page dirty?
+  :USAGECOUNT: clock-sweep access count
+  :PINNING_BACKENDS: number of backends pinning this buffer
+
 SEE ALSO
 ========
 

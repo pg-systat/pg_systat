@@ -482,7 +482,8 @@ initialize(void)
 	initstmtlocalblk();
 	initstmttempblk();
 	initstmtwal();
-    initcopyprogress();
+  initcopyprogress();
+  initbuffercacherel();
 }
 
 int

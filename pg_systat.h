@@ -63,6 +63,7 @@ int initstmtlocalblk(void);
 int initstmttempblk(void);
 int initstmtwal(void);
 int initcopyprogress(void);
+int initbuffercacherel(void);
 
 void error(const char *fmt, ...);
 char *format_b(long long);

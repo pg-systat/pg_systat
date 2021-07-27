@@ -352,6 +352,15 @@ views are:
   :TUPLES_PROCESSED: number of tuples already processed by COPY command
   :TUPLES_EXCLUDED: number of tuples not processed because they were excluded by the WHERE clause of the COPY command
 
+:buffercacherel: Display buffer cache relation statistics:
+
+  :BUFFERID: ID, in the range 1..shared_buffers
+  :RELFILENODE: filenode number of the relation
+  :RELTABLESPACE: tablespace OID of the relation
+  :RELDATABASE: database OID of the relation
+  :RELFORKNUMBER: fork number within the relation
+  :RELBLOCKNUMBER: page number within the relation
+
 SEE ALSO
 ========
 

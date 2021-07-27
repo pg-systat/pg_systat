@@ -35,8 +35,9 @@
 #endif /* __linux__ */
 
 #include <sys/types.h>
+#ifdef HAVE_SYSCTL_H
 #include <sys/sysctl.h>
-
+#endif /* HAVE_SYSCTL_H */
 
 #include <ctype.h>
 #include <curses.h>

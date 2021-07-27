@@ -48,6 +48,7 @@ check_include_files("stdlib.h;stdarg.h;string.h" STDC_HEADERS)
 
 check_include_files("string.h" HAVE_STRING_H)
 check_include_files("unistd.h" HAVE_UNISTD_H)
+check_include_files("sys/sysctl.h" HAVE_SYSCTL_H)
 
 # Check for library functions.
 

@@ -100,6 +100,7 @@ field_view views_copyprogress[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int copyprogress_exist = 1;
 int	copyprogress_count;
 struct copyprogress_t *copyprogresses;
 
@@ -113,6 +114,11 @@ copyprogress_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
+		if(PQserverVersion(options.connection) / 100 < 1300){
+			copyprogress_exist = 0;
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_COPY_PROCESS);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = copyprogress_count;
@@ -199,9 +205,13 @@ initcopyprogress(void)
 	copyprogresses = NULL;
 	copyprogress_count = 0;
 
+	read_copyprogress();
+	if(copyprogress_exist == 0){
+		return 0;
+	}
+
 	for (v = views_copyprogress; v->name != NULL; v++)
 		add_view(v);
-	read_copyprogress();
 
 	return(1);
 }

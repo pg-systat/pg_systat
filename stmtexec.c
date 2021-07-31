@@ -18,12 +18,10 @@
 		"SELECT queryid, calls, total_exec_time, min_exec_time, max_exec_time,\n" \
 		"       mean_exec_time, stddev_exec_time\n" \
 		"FROM pg_stat_statements;"
-
 #define QUERY_STAT_EXEC_12 \
 		"SELECT queryid, calls, total_time, min_time, max_time,\n" \
 		"       mean_time, stddev_time\n" \
 		"FROM pg_stat_statements;"
-
 
 struct stmtexec_t
 {

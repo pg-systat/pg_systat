@@ -82,6 +82,7 @@ field_view views_stmtwal[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int stmtwal_exist = 1;
 int	stmtwal_count;
 struct stmtwal_t *stmtwals;
 
@@ -95,6 +96,11 @@ stmtwal_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
+		if(PQserverVersion(options.connection) / 100 < 1300){
+			stmtwal_exist = 0;
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_WAL);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmtwal_count;
@@ -177,9 +183,13 @@ initstmtwal(void)
 	stmtwals = NULL;
 	stmtwal_count = 0;
 
+	read_stmtwal();
+	if(stmtwal_exist == 0){
+		return 0;
+	}
+
 	for (v = views_stmtwal; v->name != NULL; v++)
 		add_view(v);
-	read_stmtwal();
 
 	return(1);
 }

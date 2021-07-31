@@ -101,6 +101,7 @@ field_view views_stmtplan[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int stmtplan_exist = 1;
 int	stmtplan_count;
 struct stmtplan_t *stmtplans;
 
@@ -114,6 +115,11 @@ stmtplan_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
+		if(PQserverVersion(options.connection) / 100 < 1300){
+			stmtplan_exist = 0;
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_PLAN);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmtplan_count;
@@ -199,9 +205,13 @@ initstmtplan(void)
 	stmtplans = NULL;
 	stmtplan_count = 0;
 
+	read_stmtplan();
+	if(stmtplan_exist == 0){
+		return 0;
+	}
+
 	for (v = views_stmtplan; v->name != NULL; v++)
 		add_view(v);
-	read_stmtplan();
 
 	return(1);
 }

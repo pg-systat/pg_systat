@@ -105,6 +105,7 @@ field_view views_stmtexec[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int stmtexec_exist = 1;
 int	stmtexec_count;
 struct stmtexec_t *stmtexecs;
 
@@ -118,8 +119,15 @@ stmtexec_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
-        if( PQserverVersion(options.connection) / 100 < 1300){
-		    pgresult = PQexec(options.connection, QUERY_STAT_EXEC_12);
+		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+			stmtexec_exist = 0;
+			PQclear(pgresult);
+			return;
+		}
+
+		if(PQserverVersion(options.connection) / 100 < 1300){
+			pgresult = PQexec(options.connection, QUERY_STAT_EXEC_12);
 		} else {
 		    pgresult = PQexec(options.connection, QUERY_STAT_EXEC_13);
         }
@@ -204,9 +212,13 @@ initstmtexec(void)
 	stmtexecs = NULL;
 	stmtexec_count = 0;
 
+	read_stmtexec();
+	if(stmtexec_exist == 0){
+		return 0;
+	}
+
 	for (v = views_stmtexec; v->name != NULL; v++)
 		add_view(v);
-	read_stmtexec();
 
 	return(1);
 }

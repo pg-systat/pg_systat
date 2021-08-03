@@ -95,6 +95,7 @@ field_view views_stmttempblk[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int stmttempblk_exist = 1;
 int	stmttempblk_count;
 struct stmttempblk_t *stmttempblks;
 
@@ -108,6 +109,13 @@ stmttempblk_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
+		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+			stmttempblk_exist = 0;
+			PQclear(pgresult);
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_TEMP_BLK);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmttempblk_count;
@@ -188,9 +196,13 @@ initstmttempblk(void)
 	stmttempblks = NULL;
 	stmttempblk_count = 0;
 
+	read_stmttempblk();
+	if(stmttempblk_exist == 0){
+		return 0;
+	}
+
 	for (v = views_stmttempblk; v->name != NULL; v++)
 		add_view(v);
-	read_stmttempblk();
 
 	return(1);
 }

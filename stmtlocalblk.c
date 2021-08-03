@@ -95,6 +95,7 @@ field_view views_stmtlocalblk[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int stmtlocalblk_exist = 1;
 int	stmtlocalblk_count;
 struct stmtlocalblk_t *stmtlocalblks;
 
@@ -108,6 +109,13 @@ stmtlocalblk_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
+		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+			stmtlocalblk_exist = 0;
+			PQclear(pgresult);
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_LOCAL_BLK);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmtlocalblk_count;
@@ -188,9 +196,13 @@ initstmtlocalblk(void)
 	stmtlocalblks = NULL;
 	stmtlocalblk_count = 0;
 
+	read_stmtlocalblk();
+	if(stmtlocalblk_exist == 0){
+		return 0;
+	}
+
 	for (v = views_stmtlocalblk; v->name != NULL; v++)
 		add_view(v);
-	read_stmtlocalblk();
 
 	return(1);
 }

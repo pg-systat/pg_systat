@@ -101,6 +101,13 @@ stmtwal_info(void)
 			return;
 		}
 
+		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+			stmtwal_exist = 0;
+			PQclear(pgresult);
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_WAL);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmtwal_count;

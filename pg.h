@@ -9,6 +9,8 @@
 #include "pg_config_manual.h"
 
 #define TIMESTAMPLEN 29
+#define QUERY_STAT_STMT_EXIST \
+				"SELECT * from pg_extension where extname = 'pg_stat_statements'"
 
 enum pgparams
 {

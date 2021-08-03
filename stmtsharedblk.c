@@ -95,6 +95,7 @@ field_view views_stmtsharedblk[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
+int stmtsharedblk_exist = 1;
 int	stmtsharedblk_count;
 struct stmtsharedblk_t *stmtsharedblks;
 
@@ -108,6 +109,13 @@ stmtsharedblk_info(void)
 
 	connect_to_db();
 	if (options.connection != NULL) {
+		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+			stmtsharedblk_exist = 0;
+			PQclear(pgresult);
+			return;
+		}
+
 		pgresult = PQexec(options.connection, QUERY_STAT_SHARED_BLK);
 		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
 			i = stmtsharedblk_count;
@@ -188,9 +196,13 @@ initstmtsharedblk(void)
 	stmtsharedblks = NULL;
 	stmtsharedblk_count = 0;
 
+	read_stmtsharedblk();
+	if(stmtsharedblk_exist == 0){
+		return 0;
+	}
+
 	for (v = views_stmtsharedblk; v->name != NULL; v++)
 		add_view(v);
-	read_stmtsharedblk();
 
 	return(1);
 }

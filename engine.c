@@ -28,7 +28,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/string.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 
 #include <term.h>
 #include <unistd.h>
@@ -49,60 +49,62 @@
 
 /* circular linked list of views */
 TAILQ_HEAD(view_list, view_ent) view_head =
-				  TAILQ_HEAD_INITIALIZER(view_head);
-struct view_ent {
+TAILQ_HEAD_INITIALIZER(view_head);
+struct view_ent
+{
 	field_view *view;
-	TAILQ_ENTRY(view_ent) entries;
+				TAILQ_ENTRY(view_ent) entries;
 };
 
-useconds_t udelay = 5000000;
-int dispstart = 0;
-int interactive = 1;
-int averageonly = 0;
-int maxprint = 0;
-int paused = 0;
-int rawmode = 0;
-int rawwidth = DEFAULT_WIDTH;
-int sortdir = 1;
-int columns, lines;
-u_int32_t num_disp = 0;
-int max_disp = -1;
+useconds_t	udelay = 5000000;
+int			dispstart = 0;
+int			interactive = 1;
+int			averageonly = 0;
+int			maxprint = 0;
+int			paused = 0;
+int			rawmode = 0;
+int			rawwidth = DEFAULT_WIDTH;
+int			sortdir = 1;
+int			columns,
+			lines;
+u_int32_t	num_disp = 0;
+int			max_disp = -1;
 
-volatile sig_atomic_t gotsig_close = 0;
-volatile sig_atomic_t gotsig_resize = 0;
-volatile sig_atomic_t gotsig_alarm = 0;
-int need_update = 0;
-int need_sort = 0;
-int separate_thousands = 0;
+volatile	sig_atomic_t gotsig_close = 0;
+volatile	sig_atomic_t gotsig_resize = 0;
+volatile	sig_atomic_t gotsig_alarm = 0;
+int			need_update = 0;
+int			need_sort = 0;
+int			separate_thousands = 0;
 
-SCREEN *screen;
+SCREEN	   *screen;
 
 field_view *curr_view = NULL;
 struct view_ent *curr_view_ent = NULL;
 struct view_manager *curr_mgr = NULL;
 
-int curr_line = 0;
-int home_line = 0;
+int			curr_line = 0;
+int			home_line = 0;
 
 /* line buffer for raw mode */
-char linebuf[MAX_LINE_BUF];
-int linepos = 0;
+char		linebuf[MAX_LINE_BUF];
+int			linepos = 0;
 
 /* temp storage for state printing */
-char tmp_buf[MAX_LINE_BUF];
+char		tmp_buf[MAX_LINE_BUF];
 
-char cmdbuf[MAX_LINE_BUF];
-int cmd_len = -1;
+char		cmdbuf[MAX_LINE_BUF];
+int			cmd_len = -1;
 struct command *curr_cmd = NULL;
-char *curr_message = NULL;
+char	   *curr_message = NULL;
 
-void print_cmdline(void);
+void		print_cmdline(void);
 
 
 /* screen output functions */
 
-char * tb_ptr = NULL;
-int tb_len = 0;
+char	   *tb_ptr = NULL;
+int			tb_len = 0;
 
 void
 tb_start(void)
@@ -120,11 +122,11 @@ tb_end(void)
 }
 
 int
-tbprintf(char *format, ...)
-	GCC_PRINTFLIKE(1,2)       /* defined in curses.h */
+tbprintf(char *format,...)
+GCC_PRINTFLIKE(1, 2)			/* defined in curses.h */
 {
-	int len;
-	va_list arg;
+	int			len;
+	va_list		arg;
 
 	if (tb_ptr == NULL || tb_len <= 0)
 		return 0;
@@ -132,10 +134,11 @@ tbprintf(char *format, ...)
 	va_start(arg, format);
 	len = vsnprintf(tb_ptr, tb_len, format, arg);
 	va_end(arg);
-	
+
 	if (len > tb_len)
 		tb_end();
-	else if (len > 0) {
+	else if (len > 0)
+	{
 		tb_ptr += len;
 		tb_len -= len;
 	}
@@ -144,12 +147,12 @@ tbprintf(char *format, ...)
 }
 
 int
-tbprintft(char *format, ...)
-	GCC_PRINTFLIKE(1,2)       /* defined in curses.h */
+tbprintft(char *format,...)
+GCC_PRINTFLIKE(1, 2)			/* defined in curses.h */
 {
-	int len;
-	va_list arg;
-	char buf[MAX_LINE_BUF];
+	int			len;
+	va_list		arg;
+	char		buf[MAX_LINE_BUF];
 
 	if (tb_ptr == NULL || tb_len <= 0)
 		return 0;
@@ -160,31 +163,37 @@ tbprintft(char *format, ...)
 
 	if (len > tb_len)
 		tb_end();
-	else if (len > 0) {
-		int d, s;
-		int digits, curdigit;
+	else if (len > 0)
+	{
+		int			d,
+					s;
+		int			digits,
+					curdigit;
 
-		if (!separate_thousands) {
+		if (!separate_thousands)
+		{
 			strlcpy(tb_ptr, buf, tb_len);
 			return len;
 		}
 
 		/* count until we hit a non digit. (e.g. the prefix) */
 		for (digits = 0; digits < len; digits++)
-			if (!isdigit((unsigned char)buf[digits]))
+			if (!isdigit((unsigned char) buf[digits]))
 				break;
 
 		curdigit = digits;
 		d = s = 0;
 		/* insert thousands separators while copying */
-		while (curdigit && d < tb_len) {
+		while (curdigit && d < tb_len)
+		{
 			if (curdigit < digits && curdigit % 3 == 0)
 				tb_ptr[d++] = ',';
 			tb_ptr[d++] = buf[s++];
 			curdigit--;
 		}
 		/* copy the remaining non-digits */
-		while (len > digits && d < tb_len) {
+		while (len > digits && d < tb_len)
+		{
 			tb_ptr[d++] = buf[s++];
 			digits++;
 		}
@@ -199,14 +208,17 @@ tbprintft(char *format, ...)
 void
 move_horiz(int offset)
 {
-	if (rawmode) {
+	if (rawmode)
+	{
 		if (offset <= 0)
 			linepos = 0;
 		else if (offset >= MAX_LINE_BUF)
 			linepos = MAX_LINE_BUF - 1;
 		else
 			linepos = offset;
-	} else {
+	}
+	else
+	{
 		move(curr_line, offset);
 	}
 }
@@ -217,13 +229,16 @@ print_str(int len, const char *str)
 	if (len <= 0)
 		return;
 
-	if (rawmode) {
-		int length = MINIMUM(len, MAX_LINE_BUF - linepos);
+	if (rawmode)
+	{
+		int			length = MINIMUM(len, MAX_LINE_BUF - linepos);
+
 		if (length <= 0)
 			return;
 		bcopy(str, &linebuf[linepos], length);
 		linepos += length;
-	} else
+	}
+	else
 		addnstr(str, len);
 }
 
@@ -236,7 +251,8 @@ clear_linebuf(void)
 void
 end_line(void)
 {
-	if (rawmode) {
+	if (rawmode)
+	{
 		linebuf[rawwidth] = '\0';
 		printf("%s\n", linebuf);
 		clear_linebuf();
@@ -247,10 +263,13 @@ end_line(void)
 void
 end_page(void)
 {
-	if (rawmode) {
+	if (rawmode)
+	{
 		linepos = 0;
 		clear_linebuf();
-	} else {
+	}
+	else
+	{
 		move(home_line, 0);
 		print_cmdline();
 		refresh();
@@ -261,10 +280,11 @@ end_page(void)
 /* field output functions */
 
 void
-print_fld_str(field_def *fld, const char *str)
+print_fld_str(field_def * fld, const char *str)
 {
-	int len, offset;
-	char *cpos;
+	int			len,
+				offset;
+	char	   *cpos;
 
 	if (str == NULL || fld == NULL)
 		return;
@@ -274,44 +294,58 @@ print_fld_str(field_def *fld, const char *str)
 
 	len = strlen(str);
 
-	if (len >= fld->width) {
+	if (len >= fld->width)
+	{
 		move_horiz(fld->start);
 		print_str(fld->width, str);
-	} else {
-		switch (fld->align) {
-		case FLD_ALIGN_RIGHT:
-			move_horiz(fld->start + (fld->width - len));
-			break;
-		case FLD_ALIGN_CENTER:
-			move_horiz(fld->start + (fld->width - len) / 2);
-			break;
-		case FLD_ALIGN_COLUMN:
-			if ((cpos = strchr(str, ':')) == NULL) {
-				offset = (fld->width - len) / 2;
-			} else {
-				offset = (fld->width / 2) - (cpos - str);
-				if (offset < 0)
-					offset = 0;
-				else if (offset > (fld->width - len))
-					offset = fld->width - len;
-			}
-			move_horiz(fld->start + offset);
-			break;
-		default:
-			move_horiz(fld->start);
-			break;
+	}
+	else
+	{
+		switch (fld->align)
+		{
+			case FLD_ALIGN_RIGHT:
+				move_horiz(fld->start + (fld->width - len));
+				break;
+			case FLD_ALIGN_CENTER:
+				move_horiz(fld->start + (fld->width - len) / 2);
+				break;
+			case FLD_ALIGN_COLUMN:
+				if ((cpos = strchr(str, ':')) == NULL)
+				{
+					offset = (fld->width - len) / 2;
+				}
+				else
+				{
+					offset = (fld->width / 2) - (cpos - str);
+					if (offset < 0)
+						offset = 0;
+					else if (offset > (fld->width - len))
+						offset = fld->width - len;
+				}
+				move_horiz(fld->start + offset);
+				break;
+			default:
+				move_horiz(fld->start);
+				break;
 		}
 		print_str(len, str);
 	}
 }
 
 void
-print_bar_title(field_def *fld)
+print_bar_title(field_def * fld)
 {
-	char buf[16];
-	int len, i, d, tr, tw, val, pos, cur;
+	char		buf[16];
+	int			len,
+				i,
+				d,
+				tr,
+				tw,
+				val,
+				pos,
+				cur;
 
-	int divs[] = {20, 10, 5, 4, 3, 2, 1, 0};
+	int			divs[] = {20, 10, 5, 4, 3, 2, 1, 0};
 
 	if (fld->width < 1)
 		return;
@@ -324,7 +358,8 @@ print_bar_title(field_def *fld)
 		if (divs[i] * len <= fld->width)
 			break;
 
-	if (divs[i] == 0) {
+	if (divs[i] == 0)
+	{
 		print_fld_str(fld, "*****");
 		return;
 	}
@@ -338,15 +373,18 @@ print_bar_title(field_def *fld)
 
 	tb_start();
 	cur = 0;
-	for(i = 0; i < d; i++) {
+	for (i = 0; i < d; i++)
+	{
 		tw += fld->width;
 		tr += fld->arg;
 
-		while (tr >= d) {
+		while (tr >= d)
+		{
 			val++;
 			tr -= d;
 		}
-		while (tw >= d) {
+		while (tw >= d)
+		{
 			pos++;
 			tw -= d;
 		}
@@ -354,7 +392,8 @@ print_bar_title(field_def *fld)
 		len = snprintf(buf, sizeof(buf), "%d\\", val);
 		if (len >= sizeof(buf))
 			len = strlen(buf);
-		while (cur < pos - len) {
+		while (cur < pos - len)
+		{
 			tbprintf(" ");
 			cur++;
 		}
@@ -366,9 +405,11 @@ print_bar_title(field_def *fld)
 }
 
 void
-print_fld_bar(field_def *fld, int value)
+print_fld_bar(field_def * fld, int value)
 {
-	int i, tw, val;
+	int			i,
+				tw,
+				val;
 
 	if (fld->width < 1)
 		return;
@@ -378,10 +419,12 @@ print_fld_bar(field_def *fld, int value)
 
 	tb_start();
 
-	for(i = 0; i < fld->width; i++) {
+	for (i = 0; i < fld->width; i++)
+	{
 		tw += fld->arg;
 
-		while (tw >= fld->width) {
+		while (tw >= fld->width)
+		{
 			val++;
 			tw -= fld->width;
 		}
@@ -394,7 +437,7 @@ print_fld_bar(field_def *fld, int value)
 }
 
 void
-print_fld_tb(field_def *fld)
+print_fld_tb(field_def * fld)
 {
 	print_fld_str(fld, tmp_buf);
 	tb_end();
@@ -405,18 +448,21 @@ print_title(void)
 {
 	field_def **fp;
 
-	if (curr_view != NULL && curr_view->view != NULL) {
-		for (fp = curr_view->view; *fp != NULL; fp++) {
-			switch((*fp)->align) {
-			case FLD_ALIGN_LEFT:
-			case FLD_ALIGN_RIGHT:
-			case FLD_ALIGN_CENTER:
-			case FLD_ALIGN_COLUMN:
-				print_fld_str(*fp, (*fp)->title);
-				break;
-			case FLD_ALIGN_BAR:
-				print_bar_title(*fp);
-				break;
+	if (curr_view != NULL && curr_view->view != NULL)
+	{
+		for (fp = curr_view->view; *fp != NULL; fp++)
+		{
+			switch ((*fp)->align)
+			{
+				case FLD_ALIGN_LEFT:
+				case FLD_ALIGN_RIGHT:
+				case FLD_ALIGN_CENTER:
+				case FLD_ALIGN_COLUMN:
+					print_fld_str(*fp, (*fp)->title);
+					break;
+				case FLD_ALIGN_BAR:
+					print_bar_title(*fp);
+					break;
 			}
 		}
 	}
@@ -425,7 +471,7 @@ print_title(void)
 
 /* view related functions */
 void
-hide_field(field_def *fld)
+hide_field(field_def * fld)
 {
 	if (fld == NULL)
 		return;
@@ -434,7 +480,7 @@ hide_field(field_def *fld)
 }
 
 void
-show_field(field_def *fld)
+show_field(field_def * fld)
 {
 	if (fld == NULL)
 		return;
@@ -446,7 +492,7 @@ void
 reset_fields(void)
 {
 	field_def **fp;
-	field_def *fld;
+	field_def  *fld;
 
 	if (curr_view == NULL)
 		return;
@@ -454,7 +500,8 @@ reset_fields(void)
 	if (curr_view->view == NULL)
 		return;
 
-	for (fp = curr_view->view; *fp != NULL; fp++) {
+	for (fp = curr_view->view; *fp != NULL; fp++)
+	{
 		fld = *fp;
 		fld->start = -1;
 		fld->width = fld->norm_width;
@@ -465,16 +512,19 @@ void
 field_setup(void)
 {
 	field_def **fp;
-	field_def *fld;
-	int st, fwid, change;
-	int width = columns;
+	field_def  *fld;
+	int			st,
+				fwid,
+				change;
+	int			width = columns;
 
 	reset_fields();
 
 	dispstart = 0;
 	st = 0;
 
-	for (fp = curr_view->view; *fp != NULL; fp++) {
+	for (fp = curr_view->view; *fp != NULL; fp++)
+	{
 		fld = *fp;
 		if (fld->flags & FLD_FLAG_HIDDEN)
 			continue;
@@ -488,39 +538,49 @@ field_setup(void)
 		fld->start = 1;
 		fwid = fld->width;
 		st++;
-		if (fwid >= width) {
+		if (fwid >= width)
+		{
 			fld->width = width;
 			width = 0;
-		} else
+		}
+		else
 			width -= fwid;
 	}
 
-	while (width > 0) {
+	while (width > 0)
+	{
 		change = 0;
-		for (fp = curr_view->view; *fp != NULL; fp++) {
+		for (fp = curr_view->view; *fp != NULL; fp++)
+		{
 			fld = *fp;
 			if (fld->flags & FLD_FLAG_HIDDEN)
 				continue;
 			if ((fld->width < fld->max_width) &&
-			    (fld->increment <= width)) {
-				int w = fld->width + fld->increment;
+				(fld->increment <= width))
+			{
+				int			w = fld->width + fld->increment;
+
 				if (w > fld->max_width)
 					w = fld->max_width;
 				width += fld->width - w;
 				fld->width = w;
 				change = 1;
 			}
-			if (width <= 0) break;
+			if (width <= 0)
+				break;
 		}
-		if (change == 0) break;
+		if (change == 0)
+			break;
 	}
 
 	st = 0;
-	for (fp = curr_view->view; *fp != NULL; fp++) {
+	for (fp = curr_view->view; *fp != NULL; fp++)
+	{
 		fld = *fp;
 		if (fld->flags & FLD_FLAG_HIDDEN)
 			continue;
-		if (fld->start < 0) break;
+		if (fld->start < 0)
+			break;
 		fld->start = st;
 		st += fld->width + 1;
 	}
@@ -533,7 +593,8 @@ set_curr_view(struct view_ent *ve)
 
 	reset_fields();
 
-	if (ve == NULL) {
+	if (ve == NULL)
+	{
 		curr_view_ent = NULL;
 		curr_view = NULL;
 		curr_mgr = NULL;
@@ -541,8 +602,9 @@ set_curr_view(struct view_ent *ve)
 	}
 
 	v = ve->view;
-	
-	if ((curr_view != NULL) && (curr_mgr != v->mgr)) {
+
+	if ((curr_view != NULL) && (curr_mgr != v->mgr))
+	{
 		gotsig_alarm = 1;
 		if (v->mgr != NULL && v->mgr->select_fn != NULL)
 			v->mgr->select_fn();
@@ -556,7 +618,7 @@ set_curr_view(struct view_ent *ve)
 }
 
 void
-add_view(field_view *fv)
+add_view(field_view * fv)
 {
 	struct view_ent *ent;
 
@@ -580,23 +642,27 @@ add_view(field_view *fv)
 int
 set_view(const char *opt)
 {
-	struct view_ent *ve, *vm = NULL;
+	struct view_ent *ve,
+			   *vm = NULL;
 	field_view *v;
-	int len;
+	int			len;
 
 	if (opt == NULL || (len = strlen(opt)) == 0)
 		return 1;
 
-	TAILQ_FOREACH(ve, &view_head, entries) {
+	TAILQ_FOREACH(ve, &view_head, entries)
+	{
 		v = ve->view;
-		if (strncasecmp(opt, v->name, len) == 0) {
+		if (strncasecmp(opt, v->name, len) == 0)
+		{
 			if (vm)
 				return 1;
 			vm = ve;
 		}
 	}
 
-	if (vm) {
+	if (vm)
+	{
 		set_curr_view(vm);
 		return 0;
 	}
@@ -605,11 +671,12 @@ set_view(const char *opt)
 }
 
 void
-foreach_view(void (*callback)(field_view *))
+foreach_view(void (*callback) (field_view *))
 {
 	struct view_ent *ve;
 
-	TAILQ_FOREACH(ve, &view_head, entries) {
+	TAILQ_FOREACH(ve, &view_head, entries)
+	{
 		callback(ve->view);
 	}
 }
@@ -619,11 +686,13 @@ set_view_hotkey(int ch)
 {
 	struct view_ent *ve;
 	field_view *v;
-	int key = tolower(ch);
+	int			key = tolower(ch);
 
-	TAILQ_FOREACH(ve, &view_head, entries) {
+	TAILQ_FOREACH(ve, &view_head, entries)
+	{
 		v = ve->view;
-		if (key == v->hotkey) {
+		if (key == v->hotkey)
+		{
 			set_curr_view(ve);
 			return 1;
 		}
@@ -665,10 +734,12 @@ prev_view(void)
 /* generic field printing */
 
 void
-print_fld_age(field_def *fld, unsigned int age)
+print_fld_age(field_def * fld, unsigned int age)
 {
-	int len;
-	unsigned int h, m, s;
+	int			len;
+	unsigned int h,
+				m,
+				s;
 
 	if (fld == NULL)
 		return;
@@ -685,7 +756,7 @@ print_fld_age(field_def *fld, unsigned int age)
 	tb_start();
 	if (tbprintf("%02u:%02u:%02u", h, m, s) <= len)
 		goto ok;
-	
+
 	tb_start();
 	if (tbprintf("%u", age) <= len)
 		goto ok;
@@ -696,32 +767,32 @@ print_fld_age(field_def *fld, unsigned int age)
 		goto ok;
 	if (age == 0)
 		goto err;
-	
+
 	tb_start();
 	age /= 60;
 	if (tbprintf("%uh", age) <= len)
 		goto ok;
 	if (age == 0)
 		goto err;
-	
+
 	tb_start();
 	age /= 24;
 	if (tbprintf("%ud", age) <= len)
 		goto ok;
-	
+
 err:
 	print_fld_str(fld, "*");
 	tb_end();
 	return;
-	
+
 ok:
 	print_fld_tb(fld);
 }
 
 void
-print_fld_sdiv(field_def *fld, u_int64_t size, int d)
+print_fld_sdiv(field_def * fld, u_int64_t size, int d)
 {
-	int len;
+	int			len;
 
 	if (fld == NULL)
 		return;
@@ -759,7 +830,7 @@ print_fld_sdiv(field_def *fld, u_int64_t size, int d)
 	size /= d;
 	if (tbprintft("%lluT", size) <= len)
 		goto ok;
-	
+
 err:
 	print_fld_str(fld, "*");
 	tb_end();
@@ -770,15 +841,15 @@ ok:
 }
 
 void
-print_fld_size(field_def *fld, u_int64_t size)
+print_fld_size(field_def * fld, u_int64_t size)
 {
 	print_fld_sdiv(fld, size, 1024);
 }
 
 void
-print_fld_ssdiv(field_def *fld, int64_t size, int d)
+print_fld_ssdiv(field_def * fld, int64_t size, int d)
 {
-	int len;
+	int			len;
 
 	if (fld == NULL)
 		return;
@@ -827,35 +898,41 @@ ok:
 }
 
 void
-print_fld_ssize(field_def *fld, int64_t size)
+print_fld_ssize(field_def * fld, int64_t size)
 {
 	print_fld_ssdiv(fld, size, 1024);
 }
 
 void
-print_fld_rate(field_def *fld, double rate)
+print_fld_rate(field_def * fld, double rate)
 {
-	if (rate < 0) {
+	if (rate < 0)
+	{
 		print_fld_str(fld, "*");
-	} else {
+	}
+	else
+	{
 		print_fld_size(fld, rate);
 	}
 }
 
 void
-print_fld_bw(field_def *fld, double bw)
+print_fld_bw(field_def * fld, double bw)
 {
-	if (bw < 0) {
+	if (bw < 0)
+	{
 		print_fld_str(fld, "*");
-	} else {
+	}
+	else
+	{
 		print_fld_sdiv(fld, bw, 1000);
 	}
 }
 
 void
-print_fld_uint(field_def *fld, unsigned int size)
+print_fld_uint(field_def * fld, unsigned int size)
 {
-	int len;
+	int			len;
 
 	if (fld == NULL)
 		return;
@@ -873,9 +950,9 @@ print_fld_uint(field_def *fld, unsigned int size)
 }
 
 void
-print_fld_float(field_def *fld, double f, int prec)
+print_fld_float(field_def * fld, double f, int prec)
 {
-	int len;
+	int			len;
 
 	if (fld == NULL)
 		return;
@@ -896,15 +973,16 @@ print_fld_float(field_def *fld, double f, int prec)
 /* ordering */
 
 int
-foreach_order(void (*callback)(order_type *))
+foreach_order(void (*callback) (order_type *))
 {
 	order_type *o;
 
 	if (curr_view == NULL || curr_view->mgr == NULL ||
-	    curr_view->mgr->order_list == NULL)
+		curr_view->mgr->order_list == NULL)
 		return -1;
 	o = curr_view->mgr->order_list;
-	do {
+	do
+	{
 		callback(o++);
 	} while (o->name != NULL);
 	return 0;
@@ -928,8 +1006,10 @@ set_order(const char *opt)
 	if (o == NULL)
 		return;
 
-	for (;o->name != NULL; o++) {
-		if (strcasecmp(opt, o->match) == 0) {
+	for (; o->name != NULL; o++)
+	{
+		if (strcasecmp(opt, o->match) == 0)
+		{
 			curr_view->mgr->order_curr = o;
 			return;
 		}
@@ -940,7 +1020,7 @@ int
 set_order_hotkey(int ch)
 {
 	order_type *o;
-	int key = ch;
+	int			key = ch;
 
 	if (curr_view == NULL || curr_view->mgr == NULL)
 		return 0;
@@ -950,11 +1030,16 @@ set_order_hotkey(int ch)
 	if (o == NULL)
 		return 0;
 
-	for (;o->name != NULL; o++) {
-		if (key == o->hotkey) {
-			if (curr_view->mgr->order_curr == o) {
+	for (; o->name != NULL; o++)
+	{
+		if (key == o->hotkey)
+		{
+			if (curr_view->mgr->order_curr == o)
+			{
 				sortdir *= -1;
-			} else {
+			}
+			else
+			{
 				curr_view->mgr->order_curr = o;
 			}
 			return 1;
@@ -967,15 +1052,18 @@ set_order_hotkey(int ch)
 void
 next_order(void)
 {
-	order_type *o, *oc;
+	order_type *o,
+			   *oc;
 
 	if (curr_view->mgr->order_list == NULL)
 		return;
 
 	oc = curr_view->mgr->order_curr;
 
-	for (o = curr_view->mgr->order_list; o->name != NULL; o++) {
-		if (oc == o) {
+	for (o = curr_view->mgr->order_list; o->name != NULL; o++)
+	{
+		if (oc == o)
+		{
 			o++;
 			if (o->name == NULL)
 				break;
@@ -1009,23 +1097,25 @@ read_view(void)
 int
 disp_update(void)
 {
-	int li;
+	int			li;
 
 	if (maxprint < 0)
 		dispstart = 0;
 	else if (dispstart + maxprint > num_disp)
 		dispstart = num_disp - maxprint;
-	
+
 	if (dispstart < 0)
 		dispstart = 0;
 
 	if (curr_view == NULL)
 		return 0;
 
-	if (curr_mgr != NULL) {
+	if (curr_mgr != NULL)
+	{
 		curr_line = 0;
 
-		if (curr_mgr->header_fn != NULL) {
+		if (curr_mgr->header_fn != NULL)
+		{
 			li = curr_mgr->header_fn();
 			if (li < 0)
 				return (1);
@@ -1074,16 +1164,20 @@ setup_term(int dmax)
 	max_disp = dmax;
 	maxprint = dmax;
 
-	if (rawmode) {
+	if (rawmode)
+	{
 		columns = rawwidth;
 		lines = DEFAULT_HEIGHT;
 		clear_linebuf();
-	} else {
+	}
+	else
+	{
 		if (dmax < 0)
 			dmax = 0;
 
 		screen = newterm(NULL, stdout, stdin);
-		if (screen == NULL) {
+		if (screen == NULL)
+		{
 			rawmode = 1;
 			interactive = 0;
 			setup_term(dmax);
@@ -1140,14 +1234,19 @@ command_set(struct command *cmd, const char *init)
 {
 	struct command *prev = curr_cmd;
 
-	if (cmd) {
-		if (init) {
+	if (cmd)
+	{
+		if (init)
+		{
 			cmd_len = strlcpy(cmdbuf, init, sizeof(cmdbuf));
-			if (cmd_len >= sizeof(cmdbuf)) {
+			if (cmd_len >= sizeof(cmdbuf))
+			{
 				cmdbuf[0] = '\0';
 				cmd_len = 0;
 			}
-		} else {
+		}
+		else
+		{
 			cmd_len = 0;
 			cmdbuf[0] = 0;
 		}
@@ -1159,8 +1258,10 @@ command_set(struct command *cmd, const char *init)
 }
 
 const char *
-message_set(const char *msg) {
-	char *prev = curr_message;
+message_set(const char *msg)
+{
+	char	   *prev = curr_message;
+
 	if (msg)
 		curr_message = strdup(msg);
 	else
@@ -1172,12 +1273,15 @@ message_set(const char *msg) {
 void
 print_cmdline(void)
 {
-	if (curr_cmd) {
+	if (curr_cmd)
+	{
 		attron(A_STANDOUT);
 		mvprintw(home_line, 0, "%s: ", curr_cmd->prompt);
 		attroff(A_STANDOUT);
 		printw("%s", cmdbuf);
-	} else if (curr_message) {
+	}
+	else if (curr_message)
+	{
 		mvprintw(home_line, 0, "> %s", curr_message);
 	}
 	clrtoeol();
@@ -1190,52 +1294,62 @@ cmd_keyboard(int ch)
 	if (curr_cmd == NULL)
 		return;
 
-	if (ch > 0 && isprint(ch)) {
-		if (cmd_len < sizeof(cmdbuf) - 1) {
+	if (ch > 0 && isprint(ch))
+	{
+		if (cmd_len < sizeof(cmdbuf) - 1)
+		{
 			cmdbuf[cmd_len++] = ch;
 			cmdbuf[cmd_len] = 0;
-		} else
+		}
+		else
 			beep();
 	}
-	
-	switch (ch) {
-	case KEY_ENTER:
-	case 0x0a:
-	case 0x0d:
+
+	switch (ch)
 	{
-		struct command * c = command_set(NULL, NULL);
-		c->exec(cmdbuf);
-		break;
-	}
-	case KEY_BACKSPACE:
-	case KEY_DC:
-	case CTRL_H:
-		if (cmd_len > 0) {
-			cmdbuf[--cmd_len] = 0;
-		} else
-			beep();
-		break;
-	case 0x1b:
-	case CTRL_G:
-		if (cmd_len > 0) {
-			cmdbuf[0] = '\0';
-			cmd_len = 0;
-		} else
-			command_set(NULL, NULL);
-		break;
-	default:
-		break;
+		case KEY_ENTER:
+		case 0x0a:
+		case 0x0d:
+			{
+				struct command *c = command_set(NULL, NULL);
+
+				c->exec(cmdbuf);
+				break;
+			}
+		case KEY_BACKSPACE:
+		case KEY_DC:
+		case CTRL_H:
+			if (cmd_len > 0)
+			{
+				cmdbuf[--cmd_len] = 0;
+			}
+			else
+				beep();
+			break;
+		case 0x1b:
+		case CTRL_G:
+			if (cmd_len > 0)
+			{
+				cmdbuf[0] = '\0';
+				cmd_len = 0;
+			}
+			else
+				command_set(NULL, NULL);
+			break;
+		default:
+			break;
 	}
 }
 
 void
 keyboard(void)
 {
-	int ch;
+	int			ch;
 
 	ch = getch();
 
-	if (curr_cmd) {
+	if (curr_cmd)
+	{
 		cmd_keyboard(ch);
 		print_cmdline();
 		return;
@@ -1246,86 +1360,89 @@ keyboard(void)
 			if (curr_mgr->key_fn(ch))
 				return;
 
-	if (curr_message != NULL) {
-		if (ch > 0) {
+	if (curr_message != NULL)
+	{
+		if (ch > 0)
+		{
 			curr_message = NULL;
 			need_update = 1;
 		}
 	}
 
-	switch (ch) {
-	case ' ':
-		gotsig_alarm = 1;
-		break;
-	case 'o':
-		next_order();
-		need_sort = 1;
-		break;
-	case 'p':
-		paused = !paused;
-		gotsig_alarm = 1;
-		break;
-	case 'q':
-		gotsig_close = 1;
-		break;
-	case 'r':
-		sortdir *= -1;
-		need_sort = 1;
-		break;
-	case 'v':
-		/* FALLTHROUGH */
-	case KEY_RIGHT:
-		/* FALLTHROUGH */
-	case CTRL_F:
-		next_view();
-		break;
-	case KEY_LEFT:
-		/* FALLTHROUGH */
-	case CTRL_B:
-		prev_view();
-		break;
-	case KEY_DOWN:
-		/* FALLTHROUGH */
-	case CTRL_N:
-		dispstart++;
-		need_update = 1;
-		break;
-	case KEY_UP:
-		/* FALLTHROUGH */
-	case CTRL_P:
-		dispstart--;
-		need_update = 1;
-		break;
-	case KEY_NPAGE:
-		/* FALLTHROUGH */
-	case CTRL_V:
-		dispstart += maxprint;
-		need_update = 1;
-		break;
-	case KEY_PPAGE:
-		/* FALLTHROUGH */
-	case META_V:
-		dispstart -= maxprint;
-		need_update = 1;
-		break;
-	case KEY_HOME:
-		/* FALLTHROUGH */
-	case CTRL_A:
-		dispstart = 0;
-		need_update = 1;
-		break;
-	case KEY_END:
-		/* FALLTHROUGH */
-	case CTRL_E:
-		dispstart = num_disp;
-		need_update = 1;
-		break;
-	case CTRL_L:
-		clear();
-		need_update = 1;
-		break;
-	default:
-		break;
+	switch (ch)
+	{
+		case ' ':
+			gotsig_alarm = 1;
+			break;
+		case 'o':
+			next_order();
+			need_sort = 1;
+			break;
+		case 'p':
+			paused = !paused;
+			gotsig_alarm = 1;
+			break;
+		case 'q':
+			gotsig_close = 1;
+			break;
+		case 'r':
+			sortdir *= -1;
+			need_sort = 1;
+			break;
+		case 'v':
+			/* FALLTHROUGH */
+		case KEY_RIGHT:
+			/* FALLTHROUGH */
+		case CTRL_F:
+			next_view();
+			break;
+		case KEY_LEFT:
+			/* FALLTHROUGH */
+		case CTRL_B:
+			prev_view();
+			break;
+		case KEY_DOWN:
+			/* FALLTHROUGH */
+		case CTRL_N:
+			dispstart++;
+			need_update = 1;
+			break;
+		case KEY_UP:
+			/* FALLTHROUGH */
+		case CTRL_P:
+			dispstart--;
+			need_update = 1;
+			break;
+		case KEY_NPAGE:
+			/* FALLTHROUGH */
+		case CTRL_V:
+			dispstart += maxprint;
+			need_update = 1;
+			break;
+		case KEY_PPAGE:
+			/* FALLTHROUGH */
+		case META_V:
+			dispstart -= maxprint;
+			need_update = 1;
+			break;
+		case KEY_HOME:
+			/* FALLTHROUGH */
+		case CTRL_A:
+			dispstart = 0;
+			need_update = 1;
+			break;
+		case KEY_END:
+			/* FALLTHROUGH */
+		case CTRL_E:
+			dispstart = num_disp;
+			need_update = 1;
+			break;
+		case CTRL_L:
+			clear();
+			need_update = 1;
+			break;
+		default:
+			break;
 	}
 
 	if (set_order_hotkey(ch))
@@ -1347,36 +1464,41 @@ engine_initialize(void)
 void
 engine_loop(int countmax)
 {
-	int count = 0;
+	int			count = 0;
 
-	for (;;) {
+	for (;;)
+	{
 
 		/* XXX forcing refresh by setting gotsig_alarm, but why??? */
 		gotsig_alarm = 1;
 
-		if (gotsig_alarm) {
+		if (gotsig_alarm)
+		{
 			read_view();
 			need_sort = 1;
 			gotsig_alarm = 0;
 			ualarm(udelay, 0);
 		}
 
-		if (need_sort) {
+		if (need_sort)
+		{
 			sort_view();
 			need_sort = 0;
 			need_update = 1;
-			
+
 			/* XXX if sort took too long */
-			if (gotsig_alarm) {
+			if (gotsig_alarm)
+			{
 				gotsig_alarm = 0;
 				ualarm(udelay, 0);
 			}
 		}
 
-		if (need_update) {
+		if (need_update)
+		{
 			erase();
 			if (!averageonly ||
-			    (averageonly && count == countmax - 1))
+				(averageonly && count == countmax - 1))
 				disp_update();
 			end_page();
 			need_update = 0;
@@ -1386,7 +1508,8 @@ engine_loop(int countmax)
 
 		if (gotsig_close)
 			break;
-		if (gotsig_resize) {
+		if (gotsig_resize)
+		{
 			do_resize_term();
 			gotsig_resize = 0;
 			need_update = 1;
@@ -1405,42 +1528,43 @@ engine_loop(int countmax)
 int
 check_termcap(void)
 {
-	char *term_name;
-	int status;
+	char	   *term_name;
+	int			status;
 	static struct termios screen_settings;
 
 	if (!interactive)
 		/* pretend we have a dumb terminal */
-		return(1);
+		return (1);
 
 	/* get the terminal name */
 	term_name = getenv("TERM");
 	if (term_name == NULL)
-		return(1);
+		return (1);
 
 	/* now get the termcap entry */
-	if ((status = tgetent(NULL, term_name)) != 1) {
+	if ((status = tgetent(NULL, term_name)) != 1)
+	{
 		if (status == -1)
 			warnx("can't open termcap file");
 		else
-			warnx("no termcap entry for a `%s' terminal", 
-			    term_name);
+			warnx("no termcap entry for a `%s' terminal",
+				  term_name);
 
 		/* pretend it's dumb and proceed */
-		return(1);
+		return (1);
 	}
 
 	/* "hardcopy" immediately indicates a very stupid terminal */
 	if (tgetflag("hc"))
-		return(1);
+		return (1);
 
-        /* get necessary capabilities */
-        if (tgetstr("cl", NULL) == NULL || tgetstr("cm", NULL) == NULL)
-		return(1);
+	/* get necessary capabilities */
+	if (tgetstr("cl", NULL) == NULL || tgetstr("cm", NULL) == NULL)
+		return (1);
 
 	/* if stdout is not a terminal, pretend we are a dumb terminal */
 	if (tcgetattr(STDOUT_FILENO, &screen_settings) == -1)
-		return(1);
+		return (1);
 
-	return(0);
+	return (0);
 }

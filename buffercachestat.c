@@ -7,7 +7,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -23,33 +23,42 @@ struct buffercachestat_t
 {
 	RB_ENTRY(buffercachestat_t) entry;
 
-	char bufferid[NAMEDATALEN+1];
-	int64_t isdirty;
-	int64_t usagecount;
-	int64_t pinning_backends;
+	char		bufferid[NAMEDATALEN + 1];
+	int64_t		isdirty;
+	int64_t		usagecount;
+	int64_t		pinning_backends;
 };
 
-int buffercachestat_cmp(struct buffercachestat_t *, struct buffercachestat_t *);
+int			buffercachestat_cmp(struct buffercachestat_t *, struct buffercachestat_t *);
 static void buffercachestat_info(void);
-void print_buffercachestat(void);
-int read_buffercachestat(void);
-int select_buffercachestat(void);
-void sort_buffercachestat(void);
-int sort_buffercachestat_bufferid_callback(const void *, const void *);
-int sort_buffercachestat_isdirty_callback(const void *, const void *);
-int sort_buffercachestat_usagecount_callback(const void *, const void *);
-int sort_buffercachestat_pinning_backends_callback(const void *, const void *);
+void		print_buffercachestat(void);
+int			read_buffercachestat(void);
+int			select_buffercachestat(void);
+void		sort_buffercachestat(void);
+int			sort_buffercachestat_bufferid_callback(const void *, const void *);
+int			sort_buffercachestat_isdirty_callback(const void *, const void *);
+int			sort_buffercachestat_usagecount_callback(const void *, const void *);
+int			sort_buffercachestat_pinning_backends_callback(const void *, const void *);
 
 RB_HEAD(buffercachestat, buffercachestat_t) head_buffercachestats =
-		RB_INITIALIZER(&head_buffercachestats);
+RB_INITIALIZER(&head_buffercachestats);
 RB_PROTOTYPE(buffercachestat, buffercachestat_t, entry, buffercachestat_cmp)
 RB_GENERATE(buffercachestat, buffercachestat_t, entry, buffercachestat_cmp)
 
-field_def fields_buffercachestat[] = {
-	{ "BUFFERID", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "ISDIRTY", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "USAGECOUNT", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "PINNING_BACKENDS", 17, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_buffercachestat[] =
+{
+	{
+		"BUFFERID", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"ISDIRTY", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"USAGECOUNT", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"PINNING_BACKENDS", 17, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_STMT_BUFFERID        FIELD_ADDR(fields_buffercachestat, 0)
@@ -58,17 +67,17 @@ field_def fields_buffercachestat[] = {
 #define FLD_STMT_PINNING_BACKENDS  FIELD_ADDR(fields_buffercachestat, 3)
 
 /* Define views */
-field_def *view_buffercachestat_0[] = {
+field_def  *view_buffercachestat_0[] = {
 	FLD_STMT_BUFFERID, FLD_STMT_ISDIRTY, FLD_STMT_USAGECOUNT,
 	FLD_STMT_PINNING_BACKENDS, NULL
 };
 
-order_type buffercachestat_order_list[] = {
+order_type	buffercachestat_order_list[] = {
 	{"bufferid", "bufferid", 'u', sort_buffercachestat_bufferid_callback},
 	{"isdirty", "isdirty", 'i', sort_buffercachestat_isdirty_callback},
 	{"usagecount", "usagecount", 'u', sort_buffercachestat_usagecount_callback},
 	{"pinning_backends", "pinning_backends", 'n',
-			sort_buffercachestat_pinning_backends_callback},
+	sort_buffercachestat_pinning_backends_callback},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -79,38 +88,45 @@ struct view_manager buffercachestat_mgr = {
 	buffercachestat_order_list
 };
 
-field_view views_buffercachestat[] = {
-	{ view_buffercachestat_0, "buffercachestat", 'P', &buffercachestat_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_buffercachestat[] = {
+	{view_buffercachestat_0, "buffercachestat", 'P', &buffercachestat_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	buffercachestat_count;
+int			buffercachestat_count;
 struct buffercachestat_t *buffercachestats;
 
 static void
 buffercachestat_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct buffercachestat_t *n, *p;
+	struct buffercachestat_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_BUFFERCACHESTAT);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = buffercachestat_count;
 			buffercachestat_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (buffercachestat_count > i) {
+	if (buffercachestat_count > i)
+	{
 		p = reallocarray(buffercachestats, buffercachestat_count,
-				sizeof(struct buffercachestat_t));
-		if (p == NULL) {
+						 sizeof(struct buffercachestat_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -120,9 +136,11 @@ buffercachestat_info(void)
 		buffercachestats = p;
 	}
 
-	for (i = 0; i < buffercachestat_count; i++) {
+	for (i = 0; i < buffercachestat_count; i++)
+	{
 		n = malloc(sizeof(struct buffercachestat_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -131,7 +149,8 @@ buffercachestat_info(void)
 		}
 		strncpy(n->bufferid, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(buffercachestat, &head_buffercachestats, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -150,7 +169,7 @@ buffercachestat_info(void)
 int
 buffercachestat_cmp(struct buffercachestat_t *e1, struct buffercachestat_t *e2)
 {
-  return (e1->bufferid< e2->bufferid ? -1 : e1->bufferid > e2->bufferid);
+	return (e1->bufferid < e2->bufferid ? -1 : e1->bufferid > e2->bufferid);
 }
 
 int
@@ -170,7 +189,7 @@ read_buffercachestat(void)
 int
 initbuffercachestat(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	buffercachestats = NULL;
 	buffercachestat_count = 0;
@@ -179,28 +198,32 @@ initbuffercachestat(void)
 		add_view(v);
 	read_buffercachestat();
 
-	return(1);
+	return (1);
 }
 
 void
 print_buffercachestat(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < buffercachestat_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < buffercachestat_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_STMT_BUFFERID, buffercachestats[i].bufferid);
-						print_fld_uint(FLD_STMT_ISDIRTY,
-						buffercachestats[i].isdirty);
+				print_fld_uint(FLD_STMT_ISDIRTY,
+							   buffercachestats[i].isdirty);
 				print_fld_uint(FLD_STMT_USAGECOUNT,
-						buffercachestats[i].usagecount);
+							   buffercachestats[i].usagecount);
 				print_fld_uint(FLD_STMT_PINNING_BACKENDS,
-						buffercachestats[i].pinning_backends);
+							   buffercachestats[i].pinning_backends);
 				end_line();
 			}
 			if (++cur >= end)
@@ -208,7 +231,8 @@ print_buffercachestat(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -236,13 +260,15 @@ sort_buffercachestat(void)
 		return;
 
 	mergesort(buffercachestats, buffercachestat_count, sizeof(struct buffercachestat_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_buffercachestat_bufferid_callback(const void *v1, const void *v2)
 {
-	struct buffercachestat_t *n1, *n2;
+	struct buffercachestat_t *n1,
+			   *n2;
+
 	n1 = (struct buffercachestat_t *) v1;
 	n2 = (struct buffercachestat_t *) v2;
 
@@ -252,7 +278,9 @@ sort_buffercachestat_bufferid_callback(const void *v1, const void *v2)
 int
 sort_buffercachestat_isdirty_callback(const void *v1, const void *v2)
 {
-	struct buffercachestat_t *n1, *n2;
+	struct buffercachestat_t *n1,
+			   *n2;
+
 	n1 = (struct buffercachestat_t *) v1;
 	n2 = (struct buffercachestat_t *) v2;
 
@@ -267,7 +295,9 @@ sort_buffercachestat_isdirty_callback(const void *v1, const void *v2)
 int
 sort_buffercachestat_usagecount_callback(const void *v1, const void *v2)
 {
-	struct buffercachestat_t *n1, *n2;
+	struct buffercachestat_t *n1,
+			   *n2;
+
 	n1 = (struct buffercachestat_t *) v1;
 	n2 = (struct buffercachestat_t *) v2;
 
@@ -282,7 +312,9 @@ sort_buffercachestat_usagecount_callback(const void *v1, const void *v2)
 int
 sort_buffercachestat_pinning_backends_callback(const void *v1, const void *v2)
 {
-	struct buffercachestat_t *n1, *n2;
+	struct buffercachestat_t *n1,
+			   *n2;
+
 	n1 = (struct buffercachestat_t *) v1;
 	n2 = (struct buffercachestat_t *) v2;
 

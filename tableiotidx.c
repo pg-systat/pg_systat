@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -22,40 +22,49 @@ struct tableio_tidx_t
 {
 	RB_ENTRY(tableio_tidx_t) entry;
 
-	long long relid;
-	char schemaname[NAMEDATALEN + 1];
-	char relname[NAMEDATALEN + 1];
+	long long	relid;
+	char		schemaname[NAMEDATALEN + 1];
+	char		relname[NAMEDATALEN + 1];
 
-	int64_t tidx_blks_read;
-	int64_t tidx_blks_read_diff;
-	int64_t tidx_blks_read_old;
+	int64_t		tidx_blks_read;
+	int64_t		tidx_blks_read_diff;
+	int64_t		tidx_blks_read_old;
 
-	int64_t tidx_blks_hit;
-	int64_t tidx_blks_hit_diff;
-	int64_t tidx_blks_hit_old;
+	int64_t		tidx_blks_hit;
+	int64_t		tidx_blks_hit_diff;
+	int64_t		tidx_blks_hit_old;
 };
 
-int tableio_tidxcmp(struct tableio_tidx_t *, struct tableio_tidx_t *);
+int			tableio_tidxcmp(struct tableio_tidx_t *, struct tableio_tidx_t *);
 static void tableio_tidx_info(void);
-void print_tableio_tidx(void);
-int read_tableio_tidx(void);
-int select_tableio_tidx(void);
-void sort_tableio_tidx(void);
-int sort_tableio_tidx_blks_hit_callback(const void *, const void *);
-int sort_tableio_tidx_blks_read_callback(const void *, const void *);
-int sort_tableio_tidx_relname_callback(const void *, const void *);
-int sort_tableio_tidx_schemaname_callback(const void *, const void *);
+void		print_tableio_tidx(void);
+int			read_tableio_tidx(void);
+int			select_tableio_tidx(void);
+void		sort_tableio_tidx(void);
+int			sort_tableio_tidx_blks_hit_callback(const void *, const void *);
+int			sort_tableio_tidx_blks_read_callback(const void *, const void *);
+int			sort_tableio_tidx_relname_callback(const void *, const void *);
+int			sort_tableio_tidx_schemaname_callback(const void *, const void *);
 
 RB_HEAD(tableiotidx, tableio_tidx_t) head_tableio_tidxs =
-		RB_INITIALIZER(&head_tableio_tidxs);
+RB_INITIALIZER(&head_tableio_tidxs);
 RB_PROTOTYPE(tableiotidx, tableio_tidx_t, entry, tableio_tidxcmp)
 RB_GENERATE(tableiotidx, tableio_tidx_t, entry, tableio_tidxcmp)
 
-field_def fields_tableio_tidx[] = {
-	{ "SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "NAME", 5, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "TIDX_BLKS_READ", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TIDX_BLKS_HIT", 13, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_tableio_tidx[] =
+{
+	{
+		"SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"NAME", 5, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"TIDX_BLKS_READ", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TIDX_BLKS_HIT", 13, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_TABLEIO_TIDX_SCHEMA    FIELD_ADDR(fields_tableio_tidx, 0)
@@ -64,16 +73,16 @@ field_def fields_tableio_tidx[] = {
 #define FLD_TABLEIO_TIDX_BLKS_HIT  FIELD_ADDR(fields_tableio_tidx, 3)
 
 /* Define views */
-field_def *view_tableio_tidx_0[] = {
+field_def  *view_tableio_tidx_0[] = {
 	FLD_TABLEIO_TIDX_SCHEMA, FLD_TABLEIO_TIDX_NAME, FLD_TABLEIO_TIDX_BLKS_READ,
 	FLD_TABLEIO_TIDX_BLKS_HIT, NULL
 };
 
-order_type tableio_tidx_order_list[] = {
+order_type	tableio_tidx_order_list[] = {
 	{"schema", "schema", 's', sort_tableio_tidx_schemaname_callback},
 	{"name", "name", 'n', sort_tableio_tidx_relname_callback},
 	{"tidx_blks_read", "tidx_blks_read", 'd',
-			sort_tableio_tidx_blks_read_callback},
+	sort_tableio_tidx_blks_read_callback},
 	{"tidx_blks_hit", "tidx_blks_hit", 'h', sort_tableio_tidx_blks_hit_callback},
 	{NULL, NULL, 0, NULL}
 };
@@ -85,38 +94,45 @@ struct view_manager tableio_tidx_mgr = {
 	tableio_tidx_order_list
 };
 
-field_view views_tableio_tidx[] = {
-	{ view_tableio_tidx_0, "tableiotidx", 'U', &tableio_tidx_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_tableio_tidx[] = {
+	{view_tableio_tidx_0, "tableiotidx", 'U', &tableio_tidx_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	tableio_tidx_count;
+int			tableio_tidx_count;
 struct tableio_tidx_t *tableio_tidxs;
 
 static void
 tableio_tidx_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct tableio_tidx_t *n, *p;
+	struct tableio_tidx_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STATIO_TABLE_TIDX);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = tableio_tidx_count;
 			tableio_tidx_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (tableio_tidx_count > i) {
+	if (tableio_tidx_count > i)
+	{
 		p = reallocarray(tableio_tidxs, tableio_tidx_count, sizeof(struct
-					tableio_tidx_t));
-		if (p == NULL) {
+																   tableio_tidx_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -126,9 +142,11 @@ tableio_tidx_info(void)
 		tableio_tidxs = p;
 	}
 
-	for (i = 0; i < tableio_tidx_count; i++) {
+	for (i = 0; i < tableio_tidx_count; i++)
+	{
 		n = malloc(sizeof(struct tableio_tidx_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -137,7 +155,8 @@ tableio_tidx_info(void)
 		}
 		n->relid = atoll(PQgetvalue(pgresult, i, 0));
 		p = RB_INSERT(tableiotidx, &head_tableio_tidxs, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -183,7 +202,7 @@ read_tableio_tidx(void)
 int
 inittableiotidx(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	tableio_tidxs = NULL;
 	tableio_tidx_count = 0;
@@ -193,28 +212,32 @@ inittableiotidx(void)
 
 	read_tableio_tidx();
 
-	return(1);
+	return (1);
 }
 
 void
 print_tableio_tidx(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < tableio_tidx_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < tableio_tidx_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_TABLEIO_TIDX_SCHEMA,
-						tableio_tidxs[i].schemaname);
+							  tableio_tidxs[i].schemaname);
 				print_fld_str(FLD_TABLEIO_TIDX_NAME, tableio_tidxs[i].relname);
 				print_fld_uint(FLD_TABLEIO_TIDX_BLKS_READ,
-						tableio_tidxs[i].tidx_blks_read_diff);
+							   tableio_tidxs[i].tidx_blks_read_diff);
 				print_fld_uint(FLD_TABLEIO_TIDX_BLKS_HIT,
-						tableio_tidxs[i].tidx_blks_hit_diff);
+							   tableio_tidxs[i].tidx_blks_hit_diff);
 				end_line();
 			}
 			if (++cur >= end)
@@ -222,7 +245,8 @@ print_tableio_tidx(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -250,13 +274,15 @@ sort_tableio_tidx(void)
 		return;
 
 	mergesort(tableio_tidxs, tableio_tidx_count, sizeof(struct tableio_tidx_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_tableio_tidx_blks_read_callback(const void *v1, const void *v2)
 {
-	struct tableio_tidx_t *n1, *n2;
+	struct tableio_tidx_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_tidx_t *) v1;
 	n2 = (struct tableio_tidx_t *) v2;
 
@@ -271,7 +297,9 @@ sort_tableio_tidx_blks_read_callback(const void *v1, const void *v2)
 int
 sort_tableio_tidx_blks_hit_callback(const void *v1, const void *v2)
 {
-	struct tableio_tidx_t *n1, *n2;
+	struct tableio_tidx_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_tidx_t *) v1;
 	n2 = (struct tableio_tidx_t *) v2;
 
@@ -286,7 +314,9 @@ sort_tableio_tidx_blks_hit_callback(const void *v1, const void *v2)
 int
 sort_tableio_tidx_relname_callback(const void *v1, const void *v2)
 {
-	struct tableio_tidx_t *n1, *n2;
+	struct tableio_tidx_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_tidx_t *) v1;
 	n2 = (struct tableio_tidx_t *) v2;
 
@@ -301,7 +331,9 @@ sort_tableio_tidx_relname_callback(const void *v1, const void *v2)
 int
 sort_tableio_tidx_schemaname_callback(const void *v1, const void *v2)
 {
-	struct tableio_tidx_t *n1, *n2;
+	struct tableio_tidx_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_tidx_t *) v1;
 	n2 = (struct tableio_tidx_t *) v2;
 

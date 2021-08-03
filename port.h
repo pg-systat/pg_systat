@@ -25,4 +25,4 @@
 /* Portable prompt handling */
 extern char *simple_prompt(const char *prompt, int maxlen, bool echo);
 
-#endif   /* PG_PORT_H */
+#endif							/* PG_PORT_H */

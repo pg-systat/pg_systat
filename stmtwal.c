@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -22,33 +22,42 @@ struct stmtwal_t
 {
 	RB_ENTRY(stmtwal_t) entry;
 
-	char queryid[NAMEDATALEN+1];
-	int64_t wal_records;
-	int64_t wal_fpi;
-	int64_t wal_bytes;
+	char		queryid[NAMEDATALEN + 1];
+	int64_t		wal_records;
+	int64_t		wal_fpi;
+	int64_t		wal_bytes;
 
 };
 
-int stmtwal_cmp(struct stmtwal_t *, struct stmtwal_t *);
+int			stmtwal_cmp(struct stmtwal_t *, struct stmtwal_t *);
 static void stmtwal_info(void);
-void print_stmtwal(void);
-int read_stmtwal(void);
-int select_stmtwal(void);
-void sort_stmtwal(void);
-int sort_stmtwal_queryid_callback(const void *, const void *);
-int sort_stmtwal_wal_records_callback(const void *, const void *);
-int sort_stmtwal_wal_fpi_callback(const void *, const void *);
-int sort_stmtwal_wal_bytes_callback(const void *, const void *);
+void		print_stmtwal(void);
+int			read_stmtwal(void);
+int			select_stmtwal(void);
+void		sort_stmtwal(void);
+int			sort_stmtwal_queryid_callback(const void *, const void *);
+int			sort_stmtwal_wal_records_callback(const void *, const void *);
+int			sort_stmtwal_wal_fpi_callback(const void *, const void *);
+int			sort_stmtwal_wal_bytes_callback(const void *, const void *);
 
 RB_HEAD(stmtwal, stmtwal_t) head_stmtwals = RB_INITIALIZER(&head_stmtwals);
 RB_PROTOTYPE(stmtwal, stmtwal_t, entry, stmtwal_cmp)
 RB_GENERATE(stmtwal, stmtwal_t, entry, stmtwal_cmp)
 
-field_def fields_stmtwal[] = {
-	{ "QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "WAL_RECORDS", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "WAL_FPI", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "WAL_BYTES", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_stmtwal[] =
+{
+	{
+		"QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"WAL_RECORDS", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"WAL_FPI", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"WAL_BYTES", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_STMT_QUERYID        FIELD_ADDR(fields_stmtwal, 0)
@@ -57,16 +66,16 @@ field_def fields_stmtwal[] = {
 #define FLD_STMT_WAL_BYTES  FIELD_ADDR(fields_stmtwal, 3)
 
 /* Define views */
-field_def *view_stmtwal_0[] = {
+field_def  *view_stmtwal_0[] = {
 	FLD_STMT_QUERYID, FLD_STMT_WAL_RECORDS, FLD_STMT_WAL_FPI,
 	FLD_STMT_WAL_BYTES, NULL
 };
 
-order_type stmtwal_order_list[] = {
+order_type	stmtwal_order_list[] = {
 	{"queryid", "queryid", 'u', sort_stmtwal_queryid_callback},
 	{"wal_records", "wal_records", 'e', sort_stmtwal_wal_records_callback},
 	{"wal_fpi", "wal_fpi", 'f', sort_stmtwal_wal_fpi_callback},
-	{"wal_bytes", "wal_bytes", 'v',sort_stmtwal_wal_bytes_callback},
+	{"wal_bytes", "wal_bytes", 'v', sort_stmtwal_wal_bytes_callback},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -77,51 +86,60 @@ struct view_manager stmtwal_mgr = {
 	stmtwal_order_list
 };
 
-field_view views_stmtwal[] = {
-	{ view_stmtwal_0, "stmtwal", 'w', &stmtwal_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_stmtwal[] = {
+	{view_stmtwal_0, "stmtwal", 'w', &stmtwal_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int stmtwal_exist = 1;
-int	stmtwal_count;
+int			stmtwal_exist = 1;
+int			stmtwal_count;
 struct stmtwal_t *stmtwals;
 
 static void
 stmtwal_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct stmtwal_t *n, *p;
+	struct stmtwal_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
-		if(PQserverVersion(options.connection) / 100 < 1300){
+	if (options.connection != NULL)
+	{
+		if (PQserverVersion(options.connection) / 100 < 1300)
+		{
 			stmtwal_exist = 0;
 			return;
 		}
 
 		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
-		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0)
+		{
 			stmtwal_exist = 0;
 			PQclear(pgresult);
 			return;
 		}
 
 		pgresult = PQexec(options.connection, QUERY_STAT_WAL);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = stmtwal_count;
 			stmtwal_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (stmtwal_count > i) {
+	if (stmtwal_count > i)
+	{
 		p = reallocarray(stmtwals, stmtwal_count,
-				sizeof(struct stmtwal_t));
-		if (p == NULL) {
+						 sizeof(struct stmtwal_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -131,9 +149,11 @@ stmtwal_info(void)
 		stmtwals = p;
 	}
 
-	for (i = 0; i < stmtwal_count; i++) {
+	for (i = 0; i < stmtwal_count; i++)
+	{
 		n = malloc(sizeof(struct stmtwal_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -142,7 +162,8 @@ stmtwal_info(void)
 		}
 		strncpy(n->queryid, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(stmtwal, &head_stmtwals, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -161,7 +182,7 @@ stmtwal_info(void)
 int
 stmtwal_cmp(struct stmtwal_t *e1, struct stmtwal_t *e2)
 {
-  return (e1->queryid< e2->queryid ? -1 : e1->queryid > e2->queryid);
+	return (e1->queryid < e2->queryid ? -1 : e1->queryid > e2->queryid);
 }
 
 int
@@ -181,40 +202,46 @@ read_stmtwal(void)
 int
 initstmtwal(void)
 {
-    if (pg_version() < 1300 ) {
-        return 0;
-    }
+	if (pg_version() < 1300)
+	{
+		return 0;
+	}
 
-	field_view	*v;
+	field_view *v;
 
 	stmtwals = NULL;
 	stmtwal_count = 0;
 
 	read_stmtwal();
-	if(stmtwal_exist == 0){
+	if (stmtwal_exist == 0)
+	{
 		return 0;
 	}
 
 	for (v = views_stmtwal; v->name != NULL; v++)
 		add_view(v);
 
-	return(1);
+	return (1);
 }
 
 void
 print_stmtwal(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < stmtwal_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < stmtwal_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_STMT_QUERYID, stmtwals[i].queryid);
-            			print_fld_uint(FLD_STMT_WAL_RECORDS, stmtwals[i].wal_records);
+				print_fld_uint(FLD_STMT_WAL_RECORDS, stmtwals[i].wal_records);
 				print_fld_uint(FLD_STMT_WAL_FPI, stmtwals[i].wal_fpi);
 				print_fld_uint(FLD_STMT_WAL_BYTES, stmtwals[i].wal_bytes);
 				end_line();
@@ -224,7 +251,8 @@ print_stmtwal(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -252,13 +280,15 @@ sort_stmtwal(void)
 		return;
 
 	mergesort(stmtwals, stmtwal_count, sizeof(struct stmtwal_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_stmtwal_queryid_callback(const void *v1, const void *v2)
 {
-	struct stmtwal_t *n1, *n2;
+	struct stmtwal_t *n1,
+			   *n2;
+
 	n1 = (struct stmtwal_t *) v1;
 	n2 = (struct stmtwal_t *) v2;
 
@@ -268,7 +298,9 @@ sort_stmtwal_queryid_callback(const void *v1, const void *v2)
 int
 sort_stmtwal_wal_records_callback(const void *v1, const void *v2)
 {
-	struct stmtwal_t *n1, *n2;
+	struct stmtwal_t *n1,
+			   *n2;
+
 	n1 = (struct stmtwal_t *) v1;
 	n2 = (struct stmtwal_t *) v2;
 
@@ -283,7 +315,9 @@ sort_stmtwal_wal_records_callback(const void *v1, const void *v2)
 int
 sort_stmtwal_wal_fpi_callback(const void *v1, const void *v2)
 {
-	struct stmtwal_t *n1, *n2;
+	struct stmtwal_t *n1,
+			   *n2;
+
 	n1 = (struct stmtwal_t *) v1;
 	n2 = (struct stmtwal_t *) v2;
 
@@ -298,7 +332,9 @@ sort_stmtwal_wal_fpi_callback(const void *v1, const void *v2)
 int
 sort_stmtwal_wal_bytes_callback(const void *v1, const void *v2)
 {
-	struct stmtwal_t *n1, *n2;
+	struct stmtwal_t *n1,
+			   *n2;
+
 	n1 = (struct stmtwal_t *) v1;
 	n2 = (struct stmtwal_t *) v2;
 

@@ -52,123 +52,129 @@
 #define FLD_FLAG_HIDDEN 1
 
 
-typedef struct {
+typedef struct
+{
 	const char *title;
-	int norm_width;
-	int max_width;
-	int increment;
-	int align;
-	int start;
-	int width;
-	unsigned flags;
-	int arg;
-} field_def;
+	int			norm_width;
+	int			max_width;
+	int			increment;
+	int			align;
+	int			start;
+	int			width;
+	unsigned	flags;
+	int			arg;
+}			field_def;
 
-typedef struct {
-	char *name;
-	char *match;
-	int hotkey;
-	int (*func) (const void *, const void *);
-} order_type;
+typedef struct
+{
+	char	   *name;
+	char	   *match;
+	int			hotkey;
+	int			(*func) (const void *, const void *);
+}			order_type;
 
-struct view_manager {
-	char *name;
-	int  (*select_fn) (void);
-	int  (*read_fn)   (void);
-	void (*sort_fn)   (void);
-	int  (*header_fn) (void);
-	void (*print_fn)  (void);
-	int  (*key_fn)    (int);
+struct view_manager
+{
+	char	   *name;
+	int			(*select_fn) (void);
+	int			(*read_fn) (void);
+	void		(*sort_fn) (void);
+	int			(*header_fn) (void);
+	void		(*print_fn) (void);
+	int			(*key_fn) (int);
 	order_type *order_list;
 	order_type *order_curr;
 };
 
-typedef struct {
+typedef struct
+{
 	field_def **view;
-	char *name;
-	int hotkey;
+	char	   *name;
+	int			hotkey;
 	struct view_manager *mgr;
-} field_view;
+}			field_view;
 
-struct command {
-	char *prompt;
-	void ( *exec)(const char *);
+struct command
+{
+	char	   *prompt;
+	void		(*exec) (const char *);
 };
 
 
-void tb_start(void);
+void		tb_start(void);
 
-void tb_end(void);
+void		tb_end(void);
 
-int tbprintf(char *format, ...) GCC_PRINTFLIKE(1,2);
-int tbprintft(char *format, ...) GCC_PRINTFLIKE(1,2);
+int			tbprintf(char *format,...) GCC_PRINTFLIKE(1, 2);
+int			tbprintft(char *format,...) GCC_PRINTFLIKE(1, 2);
 
-void end_line(void);
-void end_page(void);
+void		end_line(void);
+void		end_page(void);
 
-void print_fld_str(field_def *, const char *);
-void print_fld_age(field_def *, unsigned int);
-void print_fld_sdiv(field_def *, u_int64_t, int);
-void print_fld_size(field_def *, u_int64_t);
-void print_fld_ssdiv(field_def *, int64_t, int);
-void print_fld_ssize(field_def *, int64_t);
-void print_fld_bw(field_def *, double);
-void print_fld_rate(field_def *, double);
-void print_fld_uint(field_def *, unsigned int);
-void print_fld_float(field_def *, double, int);
-void print_fld_bar(field_def *, int);
-void print_fld_tb(field_def *);
+void		print_fld_str(field_def *, const char *);
+void		print_fld_age(field_def *, unsigned int);
+void		print_fld_sdiv(field_def *, u_int64_t, int);
+void		print_fld_size(field_def *, u_int64_t);
+void		print_fld_ssdiv(field_def *, int64_t, int);
+void		print_fld_ssize(field_def *, int64_t);
+void		print_fld_bw(field_def *, double);
+void		print_fld_rate(field_def *, double);
+void		print_fld_uint(field_def *, unsigned int);
+void		print_fld_float(field_def *, double, int);
+void		print_fld_bar(field_def *, int);
+void		print_fld_tb(field_def *);
 
-void print_title(void);
+void		print_title(void);
 
-void hide_field(field_def *fld);
-void show_field(field_def *fld);
-void field_setup(void);
+void		hide_field(field_def * fld);
+void		show_field(field_def * fld);
+void		field_setup(void);
 
-void add_view(field_view *fv);
-int set_view(const char *opt);
-void next_view(void);
-void prev_view(void);
+void		add_view(field_view * fv);
+int			set_view(const char *opt);
+void		next_view(void);
+void		prev_view(void);
 
-int foreach_order(void (*callback)(order_type *));
-void set_order(const char *opt);
-void next_order(void);
+int			foreach_order(void (*callback) (order_type *));
+void		set_order(const char *opt);
+void		next_order(void);
 
-void setup_term(int maxpr);
-int check_termcap(void);
+void		setup_term(int maxpr);
+int			check_termcap(void);
 
-void engine_initialize(void);
-void engine_loop(int countmax);
+void		engine_initialize(void);
+void		engine_loop(int countmax);
 
 struct command *command_set(struct command *cmd, const char *init);
 const char *message_set(const char *msg);
 
-void foreach_view(void (*callback)(field_view *));
+void		foreach_view(void (*callback) (field_view *));
 
-extern int sortdir;
+extern int	sortdir;
 extern useconds_t udelay;
-extern int dispstart;
-extern int interactive;
-extern int averageonly;
-extern int maxprint;
-extern int paused;
-extern int rawmode;
-extern int rawwidth;
-extern int columns, lines;
+extern int	dispstart;
+extern int	interactive;
+extern int	averageonly;
+extern int	maxprint;
+extern int	paused;
+extern int	rawmode;
+extern int	rawwidth;
+extern int	columns,
+			lines;
 
-extern int need_update;
-extern int need_sort;
-extern int separate_thousands;
+extern int	need_update;
+extern int	need_sort;
+extern int	separate_thousands;
 
 extern volatile sig_atomic_t gotsig_close;
 extern volatile sig_atomic_t gotsig_resize;
 extern volatile sig_atomic_t gotsig_alarm;
 
-extern field_view *curr_view;
+extern field_view * curr_view;
 extern struct view_manager *curr_mgr;
 
 extern char tmp_buf[MAX_LINE_BUF];
 
-extern int curr_line; /* XXX temp */
+extern int	curr_line;			/* XXX temp */
 extern u_int32_t num_disp;
 #endif

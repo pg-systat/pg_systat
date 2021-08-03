@@ -37,36 +37,36 @@
 
 #define FIELD_ADDR(struct, x) (&struct[x])
 
-void die(void);
-int print_header(void);
-int keyboard_callback(int);
-int initdbblk(void);
-int initdbconfl(void);
-int initdbfs(void);
-int initdbtup(void);
-int initdbxact(void);
-int initindex(void);
-int initindexio(void);
-int inittableanalyze(void);
-int inittableioheap(void);
-int inittableioidx(void);
-int inittableiotidx(void);
-int inittableiotoast(void);
-int inittablescan(void);
-int inittabletup(void);
-int inittablevac(void);
-int initvacuum(void);
-int initstmtplan(void);
-int initstmtexec(void);
-int initstmtsharedblk(void);
-int initstmtlocalblk(void);
-int initstmttempblk(void);
-int initstmtwal(void);
-int initcopyprogress(void);
-int initbuffercacherel(void);
-int initbuffercachestat(void);
+void		die(void);
+int			print_header(void);
+int			keyboard_callback(int);
+int			initdbblk(void);
+int			initdbconfl(void);
+int			initdbfs(void);
+int			initdbtup(void);
+int			initdbxact(void);
+int			initindex(void);
+int			initindexio(void);
+int			inittableanalyze(void);
+int			inittableioheap(void);
+int			inittableioidx(void);
+int			inittableiotidx(void);
+int			inittableiotoast(void);
+int			inittablescan(void);
+int			inittabletup(void);
+int			inittablevac(void);
+int			initvacuum(void);
+int			initstmtplan(void);
+int			initstmtexec(void);
+int			initstmtsharedblk(void);
+int			initstmtlocalblk(void);
+int			initstmttempblk(void);
+int			initstmtwal(void);
+int			initcopyprogress(void);
+int			initbuffercacherel(void);
+int			initbuffercachestat(void);
 
-void error(const char *fmt, ...);
-char *format_b(long long);
+void		error(const char *fmt,...);
+char	   *format_b(long long);
 
-#endif /* _PGSTAT_H_ */
+#endif							/* _PGSTAT_H_ */

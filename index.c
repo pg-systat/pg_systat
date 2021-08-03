@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -23,48 +23,61 @@ struct index_t
 {
 	RB_ENTRY(index_t) entry;
 
-	long long indexrelid;
-	char schemaname[NAMEDATALEN + 1];
-	char relname[NAMEDATALEN + 1];
-	char indexrelname[NAMEDATALEN + 1];
+	long long	indexrelid;
+	char		schemaname[NAMEDATALEN + 1];
+	char		relname[NAMEDATALEN + 1];
+	char		indexrelname[NAMEDATALEN + 1];
 
-	int64_t idx_scan;
-	int64_t idx_scan_diff;
-	int64_t idx_scan_old;
-	
-	int64_t idx_tup_read;
-	int64_t idx_tup_read_diff;
-	int64_t idx_tup_read_old;
+	int64_t		idx_scan;
+	int64_t		idx_scan_diff;
+	int64_t		idx_scan_old;
 
-	int64_t idx_tup_fetch;
-	int64_t idx_tup_fetch_diff;
-	int64_t idx_tup_fetch_old;
+	int64_t		idx_tup_read;
+	int64_t		idx_tup_read_diff;
+	int64_t		idx_tup_read_old;
+
+	int64_t		idx_tup_fetch;
+	int64_t		idx_tup_fetch_diff;
+	int64_t		idx_tup_fetch_old;
 };
 
-int indexcmp(struct index_t *, struct index_t *);
+int			indexcmp(struct index_t *, struct index_t *);
 static void index_info(void);
-void print_index(void);
-int read_index(void);
-int select_index(void);
-void sort_index(void);
-int sort_index_indexrelname_callback(const void *, const void *);
-int sort_index_relname_callback(const void *, const void *);
-int sort_index_schemaname_callback(const void *, const void *);
-int sort_index_idx_scan_callback(const void *, const void *);
-int sort_index_idx_tup_fetch_callback(const void *, const void *);
-int sort_index_idx_tup_read_callback(const void *, const void *);
+void		print_index(void);
+int			read_index(void);
+int			select_index(void);
+void		sort_index(void);
+int			sort_index_indexrelname_callback(const void *, const void *);
+int			sort_index_relname_callback(const void *, const void *);
+int			sort_index_schemaname_callback(const void *, const void *);
+int			sort_index_idx_scan_callback(const void *, const void *);
+int			sort_index_idx_tup_fetch_callback(const void *, const void *);
+int			sort_index_idx_tup_read_callback(const void *, const void *);
 
 RB_HEAD(index, index_t) head_indexs = RB_INITIALIZER(&head_indexs);
 RB_PROTOTYPE(index, index_t, entry, indexcmp)
 RB_GENERATE(index, index_t, entry, indexcmp)
 
-field_def fields_index[] = {
-	{ "SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "INDEXNAME", 10, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "TABLENAME", 10, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "SCAN", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TUP_READ", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TUP_FETCH", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_index[] =
+{
+	{
+		"SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"INDEXNAME", 10, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"TABLENAME", 10, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"SCAN", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TUP_READ", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TUP_FETCH", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_INDEX_SCHEMA        FIELD_ADDR(fields_index, 0)
@@ -75,12 +88,12 @@ field_def fields_index[] = {
 #define FLD_INDEX_IDX_TUP_FETCH FIELD_ADDR(fields_index, 5)
 
 /* Define views */
-field_def *view_index_0[] = {
+field_def  *view_index_0[] = {
 	FLD_INDEX_SCHEMA, FLD_INDEX_INDEXRELNAME, FLD_INDEX_RELNAME,
 	FLD_INDEX_IDX_SCAN, FLD_INDEX_IDX_TUP_READ, FLD_INDEX_IDX_TUP_FETCH, NULL
 };
 
-order_type index_order_list[] = {
+order_type	index_order_list[] = {
 	{"schema", "schema", 's', sort_index_schemaname_callback},
 	{"indexname", "indexname", 'i', sort_index_indexrelname_callback},
 	{"tablename", "tablename", 't', sort_index_relname_callback},
@@ -96,37 +109,44 @@ struct view_manager index_mgr = {
 	print_index, keyboard_callback, index_order_list, index_order_list
 };
 
-field_view views_index[] = {
-	{ view_index_0, "index", 'U', &index_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_index[] = {
+	{view_index_0, "index", 'U', &index_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	index_count;
+int			index_count;
 struct index_t *indexs;
 
 static void
 index_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct index_t *n, *p;
+	struct index_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_INDEXES);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = index_count;
 			index_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (index_count > i) {
+	if (index_count > i)
+	{
 		p = reallocarray(indexs, index_count, sizeof(struct index_t));
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -136,9 +156,11 @@ index_info(void)
 		indexs = p;
 	}
 
-	for (i = 0; i < index_count; i++) {
+	for (i = 0; i < index_count; i++)
+	{
 		n = malloc(sizeof(struct index_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -147,7 +169,8 @@ index_info(void)
 		}
 		n->indexrelid = atoll(PQgetvalue(pgresult, i, 0));
 		p = RB_INSERT(index, &head_indexs, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -199,7 +222,7 @@ read_index(void)
 int
 initindex(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	indexs = NULL;
 	index_count = 0;
@@ -209,28 +232,32 @@ initindex(void)
 
 	read_index();
 
-	return(1);
+	return (1);
 }
 
 void
 print_index(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < index_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < index_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_INDEX_SCHEMA, indexs[i].schemaname);
 				print_fld_str(FLD_INDEX_INDEXRELNAME, indexs[i].indexrelname);
 				print_fld_str(FLD_INDEX_RELNAME, indexs[i].relname);
 				print_fld_uint(FLD_INDEX_IDX_SCAN, indexs[i].idx_scan);
 				print_fld_uint(FLD_INDEX_IDX_TUP_READ, indexs[i].idx_tup_read);
 				print_fld_uint(FLD_INDEX_IDX_TUP_FETCH,
-						indexs[i].idx_tup_fetch);
+							   indexs[i].idx_tup_fetch);
 				end_line();
 			}
 			if (++cur >= end)
@@ -238,7 +265,8 @@ print_index(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -266,13 +294,15 @@ sort_index(void)
 		return;
 
 	mergesort(indexs, index_count, sizeof(struct index_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_index_idx_scan_callback(const void *v1, const void *v2)
 {
-	struct index_t *n1, *n2;
+	struct index_t *n1,
+			   *n2;
+
 	n1 = (struct index_t *) v1;
 	n2 = (struct index_t *) v2;
 
@@ -287,7 +317,9 @@ sort_index_idx_scan_callback(const void *v1, const void *v2)
 int
 sort_index_idx_tup_fetch_callback(const void *v1, const void *v2)
 {
-	struct index_t *n1, *n2;
+	struct index_t *n1,
+			   *n2;
+
 	n1 = (struct index_t *) v1;
 	n2 = (struct index_t *) v2;
 
@@ -302,7 +334,9 @@ sort_index_idx_tup_fetch_callback(const void *v1, const void *v2)
 int
 sort_index_idx_tup_read_callback(const void *v1, const void *v2)
 {
-	struct index_t *n1, *n2;
+	struct index_t *n1,
+			   *n2;
+
 	n1 = (struct index_t *) v1;
 	n2 = (struct index_t *) v2;
 
@@ -317,7 +351,9 @@ sort_index_idx_tup_read_callback(const void *v1, const void *v2)
 int
 sort_index_indexrelname_callback(const void *v1, const void *v2)
 {
-	struct index_t *n1, *n2;
+	struct index_t *n1,
+			   *n2;
+
 	n1 = (struct index_t *) v1;
 	n2 = (struct index_t *) v2;
 
@@ -332,7 +368,9 @@ sort_index_indexrelname_callback(const void *v1, const void *v2)
 int
 sort_index_relname_callback(const void *v1, const void *v2)
 {
-	struct index_t *n1, *n2;
+	struct index_t *n1,
+			   *n2;
+
 	n1 = (struct index_t *) v1;
 	n2 = (struct index_t *) v2;
 
@@ -347,7 +385,9 @@ sort_index_relname_callback(const void *v1, const void *v2)
 int
 sort_index_schemaname_callback(const void *v1, const void *v2)
 {
-	struct index_t *n1, *n2;
+	struct index_t *n1,
+			   *n2;
+
 	n1 = (struct index_t *) v1;
 	n2 = (struct index_t *) v2;
 

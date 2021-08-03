@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -22,44 +22,59 @@
 struct dbxact_t
 {
 	RB_ENTRY(dbxact_t) entry;
-	long long datid;
-	char datname[NAMEDATALEN + 1];
+	long long	datid;
+	char		datname[NAMEDATALEN + 1];
 	unsigned int numbackends;
-	int64_t xact_commit;
-	int64_t xact_commit_diff;
-	int64_t xact_commit_old;
-	int64_t xact_rollback;
-	int64_t xact_rollback_diff;
-	int64_t xact_rollback_old;
-	int64_t deadlocks;
-	int64_t deadlocks_diff;
-	int64_t deadlocks_old;
+	int64_t		xact_commit;
+	int64_t		xact_commit_diff;
+	int64_t		xact_commit_old;
+	int64_t		xact_rollback;
+	int64_t		xact_rollback_diff;
+	int64_t		xact_rollback_old;
+	int64_t		deadlocks;
+	int64_t		deadlocks_diff;
+	int64_t		deadlocks_old;
 };
 
-int dbxactcmp(struct dbxact_t *, struct dbxact_t *);
+int			dbxactcmp(struct dbxact_t *, struct dbxact_t *);
 static void dbxact_info(void);
-void print_dbxact(void);
-int read_dbxact(void);
-int select_dbxact(void);
-void sort_dbxact(void);
-int sort_dbxact_commit_callback(const void *, const void *);
-int sort_dbxact_datname_callback(const void *, const void *);
-int sort_dbxact_deadlocks_callback(const void *, const void *);
-int sort_dbxact_numbackends_callback(const void *, const void *);
-int sort_dbxact_rollback_callback(const void *, const void *);
+void		print_dbxact(void);
+int			read_dbxact(void);
+int			select_dbxact(void);
+void		sort_dbxact(void);
+int			sort_dbxact_commit_callback(const void *, const void *);
+int			sort_dbxact_datname_callback(const void *, const void *);
+int			sort_dbxact_deadlocks_callback(const void *, const void *);
+int			sort_dbxact_numbackends_callback(const void *, const void *);
+int			sort_dbxact_rollback_callback(const void *, const void *);
 
 RB_HEAD(dbxact, dbxact_t) head_dbxacts = RB_INITIALIZER(&head_dbxacts);
 RB_PROTOTYPE(dbxact, dbxact_t, entry, dbxactcmp)
 RB_GENERATE(dbxact, dbxact_t, entry, dbxactcmp)
 
-field_def fields_dbxact[] = {
-	{ "DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "CONNECTIONS", 12, 12, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "COMMITS", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "COMMITS/s", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "ROLLBACKS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "ROLLBACKS/s", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "DEADLOCKS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_dbxact[] =
+{
+	{
+		"DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"CONNECTIONS", 12, 12, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"COMMITS", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"COMMITS/s", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"ROLLBACKS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"ROLLBACKS/s", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"DEADLOCKS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_DB_DATNAME       FIELD_ADDR(fields_dbxact, 0)
@@ -71,13 +86,13 @@ field_def fields_dbxact[] = {
 #define FLD_DB_DEADLOCKS     FIELD_ADDR(fields_dbxact, 6)
 
 /* Define views */
-field_def *view_dbxact_0[] = {
+field_def  *view_dbxact_0[] = {
 	FLD_DB_DATNAME, FLD_DB_NUMBACKENDS, FLD_DB_XACT_COMMIT,
 	FLD_DB_XACT_COMMIT_RATE, FLD_DB_XACT_ROLLBACK, FLD_DB_XACT_ROLLBACK_RATE,
 	FLD_DB_DEADLOCKS, NULL
 };
 
-order_type dbxact_order_list[] = {
+order_type	dbxact_order_list[] = {
 	{"datname", "datname", 'n', sort_dbxact_datname_callback},
 	{"numbackends", "numbackends", 'b', sort_dbxact_numbackends_callback},
 	{"xact_commit", "xact_commit", 'c', sort_dbxact_commit_callback},
@@ -92,37 +107,44 @@ struct view_manager dbxact_mgr = {
 	print_dbxact, keyboard_callback, dbxact_order_list, dbxact_order_list
 };
 
-field_view views_dbxact[] = {
-	{ view_dbxact_0, "dbxact", 'D', &dbxact_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_dbxact[] = {
+	{view_dbxact_0, "dbxact", 'D', &dbxact_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	dbxact_count;
+int			dbxact_count;
 struct dbxact_t *dbxacts;
 
 static void
 dbxact_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct dbxact_t *n, *p;
+	struct dbxact_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_DBXACT);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = dbxact_count;
 			dbxact_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (dbxact_count > i) {
+	if (dbxact_count > i)
+	{
 		p = reallocarray(dbxacts, dbxact_count, sizeof(struct dbxact_t));
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -132,9 +154,11 @@ dbxact_info(void)
 		dbxacts = p;
 	}
 
-	for (i = 0; i < dbxact_count; i++) {
+	for (i = 0; i < dbxact_count; i++)
+	{
 		n = malloc(sizeof(struct dbxact_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -145,7 +169,8 @@ dbxact_info(void)
 		p = RB_INSERT(dbxact, &head_dbxacts, n);
 		if (p == NULL)
 			strncpy(n->datname, PQgetvalue(pgresult, i, 1), NAMEDATALEN);
-		else {
+		else
+		{
 			free(n);
 			n = p;
 		}
@@ -194,7 +219,7 @@ read_dbxact(void)
 int
 initdbxact(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	dbxacts = NULL;
 	dbxact_count = 0;
@@ -204,32 +229,36 @@ initdbxact(void)
 
 	read_dbxact();
 
-	return(1);
+	return (1);
 }
 
 void
 print_dbxact(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < dbxact_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < dbxact_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_DB_DATNAME, dbxacts[i].datname);
 				print_fld_uint(FLD_DB_NUMBACKENDS, dbxacts[i].numbackends);
 				print_fld_ssize(FLD_DB_XACT_COMMIT,
-						dbxacts[i].xact_commit_diff);
+								dbxacts[i].xact_commit_diff);
 				print_fld_ssize(FLD_DB_XACT_COMMIT_RATE,
-						dbxacts[i].xact_commit_diff /
+								dbxacts[i].xact_commit_diff /
 								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_XACT_ROLLBACK,
-						dbxacts[i].xact_rollback_diff);
+								dbxacts[i].xact_rollback_diff);
 				print_fld_ssize(FLD_DB_XACT_ROLLBACK_RATE,
-						dbxacts[i].xact_rollback_diff /
+								dbxacts[i].xact_rollback_diff /
 								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_DEADLOCKS, dbxacts[i].deadlocks_diff);
 				end_line();
@@ -239,7 +268,8 @@ print_dbxact(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -272,7 +302,9 @@ sort_dbxact(void)
 int
 sort_dbxact_commit_callback(const void *v1, const void *v2)
 {
-	struct dbxact_t *n1, *n2;
+	struct dbxact_t *n1,
+			   *n2;
+
 	n1 = (struct dbxact_t *) v1;
 	n2 = (struct dbxact_t *) v2;
 
@@ -287,7 +319,9 @@ sort_dbxact_commit_callback(const void *v1, const void *v2)
 int
 sort_dbxact_datname_callback(const void *v1, const void *v2)
 {
-	struct dbxact_t *n1, *n2;
+	struct dbxact_t *n1,
+			   *n2;
+
 	n1 = (struct dbxact_t *) v1;
 	n2 = (struct dbxact_t *) v2;
 
@@ -297,7 +331,9 @@ sort_dbxact_datname_callback(const void *v1, const void *v2)
 int
 sort_dbxact_deadlocks_callback(const void *v1, const void *v2)
 {
-	struct dbxact_t *n1, *n2;
+	struct dbxact_t *n1,
+			   *n2;
+
 	n1 = (struct dbxact_t *) v1;
 	n2 = (struct dbxact_t *) v2;
 
@@ -312,7 +348,9 @@ sort_dbxact_deadlocks_callback(const void *v1, const void *v2)
 int
 sort_dbxact_numbackends_callback(const void *v1, const void *v2)
 {
-	struct dbxact_t *n1, *n2;
+	struct dbxact_t *n1,
+			   *n2;
+
 	n1 = (struct dbxact_t *) v1;
 	n2 = (struct dbxact_t *) v2;
 
@@ -327,7 +365,9 @@ sort_dbxact_numbackends_callback(const void *v1, const void *v2)
 int
 sort_dbxact_rollback_callback(const void *v1, const void *v2)
 {
-	struct dbxact_t *n1, *n2;
+	struct dbxact_t *n1,
+			   *n2;
+
 	n1 = (struct dbxact_t *) v1;
 	n2 = (struct dbxact_t *) v2;
 

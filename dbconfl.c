@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -24,54 +24,69 @@
 struct dbconfl_t
 {
 	RB_ENTRY(dbconfl_t) entry;
-	long long datid;
-	char datname[NAMEDATALEN + 1];
-	int64_t conflicts;
-	int64_t conflicts_diff;
-	int64_t conflicts_old;
-	int64_t confl_tablespace;
-	int64_t confl_tablespace_diff;
-	int64_t confl_tablespace_old;
-	int64_t confl_lock;
-	int64_t confl_lock_diff;
-	int64_t confl_lock_old;
-	int64_t confl_snapshot;
-	int64_t confl_snapshot_diff;
-	int64_t confl_snapshot_old;
-	int64_t confl_bufferpin;
-	int64_t confl_bufferpin_diff;
-	int64_t confl_bufferpin_old;
-	int64_t confl_deadlock;
-	int64_t confl_deadlock_diff;
-	int64_t confl_deadlock_old;
+	long long	datid;
+	char		datname[NAMEDATALEN + 1];
+	int64_t		conflicts;
+	int64_t		conflicts_diff;
+	int64_t		conflicts_old;
+	int64_t		confl_tablespace;
+	int64_t		confl_tablespace_diff;
+	int64_t		confl_tablespace_old;
+	int64_t		confl_lock;
+	int64_t		confl_lock_diff;
+	int64_t		confl_lock_old;
+	int64_t		confl_snapshot;
+	int64_t		confl_snapshot_diff;
+	int64_t		confl_snapshot_old;
+	int64_t		confl_bufferpin;
+	int64_t		confl_bufferpin_diff;
+	int64_t		confl_bufferpin_old;
+	int64_t		confl_deadlock;
+	int64_t		confl_deadlock_diff;
+	int64_t		confl_deadlock_old;
 };
 
-int dbconflcmp(struct dbconfl_t *, struct dbconfl_t *);
+int			dbconflcmp(struct dbconfl_t *, struct dbconfl_t *);
 static void dbconfl_info(void);
-void print_dbconfl(void);
-int read_dbconfl(void);
-int select_dbconfl(void);
-void sort_dbconfl(void);
-int sort_dbconfl_bufferpin_callback(const void *, const void *);
-int sort_dbconfl_conflicts_callback(const void *, const void *);
-int sort_dbconfl_datname_callback(const void *, const void *);
-int sort_dbconfl_deadlock_callback(const void *, const void *);
-int sort_dbconfl_lock_callback(const void *, const void *);
-int sort_dbconfl_snapshot_callback(const void *, const void *);
-int sort_dbconfl_tablespace_callback(const void *, const void *);
+void		print_dbconfl(void);
+int			read_dbconfl(void);
+int			select_dbconfl(void);
+void		sort_dbconfl(void);
+int			sort_dbconfl_bufferpin_callback(const void *, const void *);
+int			sort_dbconfl_conflicts_callback(const void *, const void *);
+int			sort_dbconfl_datname_callback(const void *, const void *);
+int			sort_dbconfl_deadlock_callback(const void *, const void *);
+int			sort_dbconfl_lock_callback(const void *, const void *);
+int			sort_dbconfl_snapshot_callback(const void *, const void *);
+int			sort_dbconfl_tablespace_callback(const void *, const void *);
 
 RB_HEAD(dbconfl, dbconfl_t) head_dbconfls = RB_INITIALIZER(&head_dbconfls);
 RB_PROTOTYPE(dbconfl, dbconfl_t, entry, dbconflcmp)
 RB_GENERATE(dbconfl, dbconfl_t, entry, dbconflcmp)
 
-field_def fields_dbconfl[] = {
-	{ "DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "CONFLICTS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TABLESPACE", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "LOCK", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "SNAPSHOT", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "BUFFERPIN", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "DEADLOCK", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_dbconfl[] =
+{
+	{
+		"DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"CONFLICTS", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TABLESPACE", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"LOCK", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"SNAPSHOT", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"BUFFERPIN", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"DEADLOCK", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_DB_DATNAME          FIELD_ADDR(fields_dbconfl, 0)
@@ -83,21 +98,21 @@ field_def fields_dbconfl[] = {
 #define FLD_DB_CONFL_DEADLOCK   FIELD_ADDR(fields_dbconfl, 6)
 
 /* Define views */
-field_def *view_dbconfl_0[] = {
+field_def  *view_dbconfl_0[] = {
 	FLD_DB_DATNAME, FLD_DB_CONFLICTS, FLD_DB_CONFL_TABLESPACE,
 	FLD_DB_CONFL_LOCK, FLD_DB_CONFL_SNAPSHOT, FLD_DB_CONFL_BUFFERPIN,
 	FLD_DB_CONFL_DEADLOCK, NULL
 };
 
-order_type dbconfl_order_list[] = {
+order_type	dbconfl_order_list[] = {
 	{"datname", "datname", 'n', sort_dbconfl_datname_callback},
 	{"conflicts", "conflicts", 'c', sort_dbconfl_conflicts_callback},
 	{"confl_tablespace", "confl_tablespace", 't',
-			sort_dbconfl_tablespace_callback},
+	sort_dbconfl_tablespace_callback},
 	{"confl_lock", "confl_lock", 'l', sort_dbconfl_lock_callback},
 	{"confl_snapshot", "confl_snapshot", 's', sort_dbconfl_snapshot_callback},
 	{"confl_bufferpin", "confl_bufferpin", 'b',
-			sort_dbconfl_bufferpin_callback},
+	sort_dbconfl_bufferpin_callback},
 	{"confl_deadlock", "confl_deadlock", 'd', sort_dbconfl_deadlock_callback},
 	{NULL, NULL, 0, NULL}
 };
@@ -108,37 +123,44 @@ struct view_manager dbconfl_mgr = {
 	print_dbconfl, keyboard_callback, dbconfl_order_list, dbconfl_order_list
 };
 
-field_view views_dbconfl[] = {
-	{ view_dbconfl_0, "dbconfl", 'C', &dbconfl_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_dbconfl[] = {
+	{view_dbconfl_0, "dbconfl", 'C', &dbconfl_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	dbconfl_count;
+int			dbconfl_count;
 struct dbconfl_t *dbconfls;
 
 static void
 dbconfl_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct dbconfl_t *n, *p;
+	struct dbconfl_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_DBCONFL);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = dbconfl_count;
 			dbconfl_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (dbconfl_count > i) {
+	if (dbconfl_count > i)
+	{
 		p = reallocarray(dbconfls, dbconfl_count, sizeof(struct dbconfl_t));
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -148,9 +170,11 @@ dbconfl_info(void)
 		dbconfls = p;
 	}
 
-	for (i = 0; i < dbconfl_count; i++) {
+	for (i = 0; i < dbconfl_count; i++)
+	{
 		n = malloc(sizeof(struct dbconfl_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -161,7 +185,8 @@ dbconfl_info(void)
 		p = RB_INSERT(dbconfl, &head_dbconfls, n);
 		if (p == NULL)
 			strncpy(n->datname, PQgetvalue(pgresult, i, 1), NAMEDATALEN);
-		else {
+		else
+		{
 			free(n);
 			n = p;
 		}
@@ -221,7 +246,7 @@ read_dbconfl(void)
 int
 initdbconfl(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	dbconfls = NULL;
 	dbconfl_count = 0;
@@ -231,33 +256,37 @@ initdbconfl(void)
 
 	read_dbconfl();
 
-	return(1);
+	return (1);
 }
 
 void
 print_dbconfl(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < dbconfl_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < dbconfl_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_DB_DATNAME, dbconfls[i].datname);
 				print_fld_ssize(FLD_DB_CONFLICTS, dbconfls[i].conflicts_diff);
 				print_fld_ssize(FLD_DB_CONFL_TABLESPACE,
-						dbconfls[i].confl_tablespace_diff);
+								dbconfls[i].confl_tablespace_diff);
 				print_fld_ssize(FLD_DB_CONFL_LOCK,
-						dbconfls[i].confl_lock_diff);
+								dbconfls[i].confl_lock_diff);
 				print_fld_ssize(FLD_DB_CONFL_SNAPSHOT,
-						dbconfls[i].confl_snapshot_diff);
+								dbconfls[i].confl_snapshot_diff);
 				print_fld_ssize(FLD_DB_CONFL_BUFFERPIN,
-						dbconfls[i].confl_bufferpin_diff);
+								dbconfls[i].confl_bufferpin_diff);
 				print_fld_ssize(FLD_DB_CONFL_DEADLOCK,
-						dbconfls[i].confl_deadlock_diff);
+								dbconfls[i].confl_deadlock_diff);
 				end_line();
 			}
 			if (++cur >= end)
@@ -265,7 +294,8 @@ print_dbconfl(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -298,7 +328,9 @@ sort_dbconfl(void)
 int
 sort_dbconfl_bufferpin_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 
@@ -313,7 +345,9 @@ sort_dbconfl_bufferpin_callback(const void *v1, const void *v2)
 int
 sort_dbconfl_datname_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 
@@ -323,7 +357,9 @@ sort_dbconfl_datname_callback(const void *v1, const void *v2)
 int
 sort_dbconfl_conflicts_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 
@@ -338,7 +374,9 @@ sort_dbconfl_conflicts_callback(const void *v1, const void *v2)
 int
 sort_dbconfl_deadlock_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 
@@ -353,7 +391,9 @@ sort_dbconfl_deadlock_callback(const void *v1, const void *v2)
 int
 sort_dbconfl_lock_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 
@@ -368,7 +408,9 @@ sort_dbconfl_lock_callback(const void *v1, const void *v2)
 int
 sort_dbconfl_tablespace_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 
@@ -383,7 +425,9 @@ sort_dbconfl_tablespace_callback(const void *v1, const void *v2)
 int
 sort_dbconfl_snapshot_callback(const void *v1, const void *v2)
 {
-	struct dbconfl_t *n1, *n2;
+	struct dbconfl_t *n1,
+			   *n2;
+
 	n1 = (struct dbconfl_t *) v1;
 	n2 = (struct dbconfl_t *) v2;
 

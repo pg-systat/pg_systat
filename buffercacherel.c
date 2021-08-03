@@ -7,7 +7,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -24,40 +24,53 @@ struct buffercacherel_t
 {
 	RB_ENTRY(buffercacherel_t) entry;
 
-	char bufferid[NAMEDATALEN+1];
-	int64_t relfilenode;
-	int64_t reltablespace;
-	int64_t reldatabase;
-	int64_t relforknumber;
-	int64_t relblocknumber;
+	char		bufferid[NAMEDATALEN + 1];
+	int64_t		relfilenode;
+	int64_t		reltablespace;
+	int64_t		reldatabase;
+	int64_t		relforknumber;
+	int64_t		relblocknumber;
 
 };
 
-int buffercacherel_cmp(struct buffercacherel_t *, struct buffercacherel_t *);
+int			buffercacherel_cmp(struct buffercacherel_t *, struct buffercacherel_t *);
 static void buffercacherel_info(void);
-void print_buffercacherel(void);
-int read_buffercacherel(void);
-int select_buffercacherel(void);
-void sort_buffercacherel(void);
-int sort_buffercacherel_bufferid_callback(const void *, const void *);
-int sort_buffercacherel_relfilenode_callback(const void *, const void *);
-int sort_buffercacherel_reltablespace_callback(const void *, const void *);
-int sort_buffercacherel_reldatabase_callback(const void *, const void *);
-int sort_buffercacherel_relforknumber_callback(const void *, const void *);
-int sort_buffercacherel_relblocknumber_callback(const void *, const void *);
+void		print_buffercacherel(void);
+int			read_buffercacherel(void);
+int			select_buffercacherel(void);
+void		sort_buffercacherel(void);
+int			sort_buffercacherel_bufferid_callback(const void *, const void *);
+int			sort_buffercacherel_relfilenode_callback(const void *, const void *);
+int			sort_buffercacherel_reltablespace_callback(const void *, const void *);
+int			sort_buffercacherel_reldatabase_callback(const void *, const void *);
+int			sort_buffercacherel_relforknumber_callback(const void *, const void *);
+int			sort_buffercacherel_relblocknumber_callback(const void *, const void *);
 
 RB_HEAD(buffercacherel, buffercacherel_t) head_buffercacherels =
-		RB_INITIALIZER(&head_buffercacherels);
+RB_INITIALIZER(&head_buffercacherels);
 RB_PROTOTYPE(buffercacherel, buffercacherel_t, entry, buffercacherel_cmp)
 RB_GENERATE(buffercacherel, buffercacherel_t, entry, buffercacherel_cmp)
 
-field_def fields_buffercacherel[] = {
-	{ "BUFFERID", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "RELFILENODE", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "RELTABLESPACE", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "RELDATABASE", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "RELFORKNUMBER", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "RELBLOCKNUMBER", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_buffercacherel[] =
+{
+	{
+		"BUFFERID", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"RELFILENODE", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"RELTABLESPACE", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"RELDATABASE", 12, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"RELFORKNUMBER", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"RELBLOCKNUMBER", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_STMT_BUFFERID        FIELD_ADDR(fields_buffercacherel, 0)
@@ -68,17 +81,17 @@ field_def fields_buffercacherel[] = {
 #define FLD_STMT_RELBLOCKNUMBER FIELD_ADDR(fields_buffercacherel, 5)
 
 /* Define views */
-field_def *view_buffercacherel_0[] = {
+field_def  *view_buffercacherel_0[] = {
 	FLD_STMT_BUFFERID, FLD_STMT_RELFILENODE, FLD_STMT_RELTABLESPACE,
 	FLD_STMT_RELDATABASE, FLD_STMT_RELFORKNUMBER, FLD_STMT_RELBLOCKNUMBER, NULL
 };
 
-order_type buffercacherel_order_list[] = {
+order_type	buffercacherel_order_list[] = {
 	{"bufferid", "bufferid", 'u', sort_buffercacherel_bufferid_callback},
 	{"relfilenode", "relfilenode", 'f', sort_buffercacherel_relfilenode_callback},
 	{"reltablespace", "reltablespace", 't', sort_buffercacherel_reltablespace_callback},
 	{"reldatabase", "reldatabase", 'a',
-			sort_buffercacherel_reldatabase_callback},
+	sort_buffercacherel_reldatabase_callback},
 	{"relforknumber", "relforknumber", 'r', sort_buffercacherel_relforknumber_callback},
 	{"relblocknumber", "relblocknumber", 'b', sort_buffercacherel_relblocknumber_callback},
 	{NULL, NULL, 0, NULL}
@@ -91,38 +104,45 @@ struct view_manager buffercacherel_mgr = {
 	buffercacherel_order_list
 };
 
-field_view views_buffercacherel[] = {
-	{ view_buffercacherel_0, "buffercacherel", 'P', &buffercacherel_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_buffercacherel[] = {
+	{view_buffercacherel_0, "buffercacherel", 'P', &buffercacherel_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	buffercacherel_count;
+int			buffercacherel_count;
 struct buffercacherel_t *buffercacherels;
 
 static void
 buffercacherel_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct buffercacherel_t *n, *p;
+	struct buffercacherel_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_BUFFERCACHEREL);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = buffercacherel_count;
 			buffercacherel_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (buffercacherel_count > i) {
+	if (buffercacherel_count > i)
+	{
 		p = reallocarray(buffercacherels, buffercacherel_count,
-				sizeof(struct buffercacherel_t));
-		if (p == NULL) {
+						 sizeof(struct buffercacherel_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -132,9 +152,11 @@ buffercacherel_info(void)
 		buffercacherels = p;
 	}
 
-	for (i = 0; i < buffercacherel_count; i++) {
+	for (i = 0; i < buffercacherel_count; i++)
+	{
 		n = malloc(sizeof(struct buffercacherel_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -143,7 +165,8 @@ buffercacherel_info(void)
 		}
 		strncpy(n->bufferid, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(buffercacherel, &head_buffercacherels, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -164,7 +187,7 @@ buffercacherel_info(void)
 int
 buffercacherel_cmp(struct buffercacherel_t *e1, struct buffercacherel_t *e2)
 {
-  return (e1->bufferid< e2->bufferid ? -1 : e1->bufferid > e2->bufferid);
+	return (e1->bufferid < e2->bufferid ? -1 : e1->bufferid > e2->bufferid);
 }
 
 int
@@ -184,7 +207,7 @@ read_buffercacherel(void)
 int
 initbuffercacherel(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	buffercacherels = NULL;
 	buffercacherel_count = 0;
@@ -193,32 +216,36 @@ initbuffercacherel(void)
 		add_view(v);
 	read_buffercacherel();
 
-	return(1);
+	return (1);
 }
 
 void
 print_buffercacherel(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < buffercacherel_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < buffercacherel_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_STMT_BUFFERID, buffercacherels[i].bufferid);
-						print_fld_uint(FLD_STMT_RELFILENODE,
-						buffercacherels[i].relfilenode);
+				print_fld_uint(FLD_STMT_RELFILENODE,
+							   buffercacherels[i].relfilenode);
 				print_fld_uint(FLD_STMT_RELTABLESPACE,
-						buffercacherels[i].reltablespace);
+							   buffercacherels[i].reltablespace);
 				print_fld_uint(FLD_STMT_RELDATABASE,
-						buffercacherels[i].reldatabase);
+							   buffercacherels[i].reldatabase);
 				print_fld_uint(FLD_STMT_RELFORKNUMBER,
-						buffercacherels[i].relforknumber);
+							   buffercacherels[i].relforknumber);
 				print_fld_uint(FLD_STMT_RELBLOCKNUMBER,
-						buffercacherels[i].relblocknumber);
+							   buffercacherels[i].relblocknumber);
 				end_line();
 			}
 			if (++cur >= end)
@@ -226,7 +253,8 @@ print_buffercacherel(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -254,13 +282,15 @@ sort_buffercacherel(void)
 		return;
 
 	mergesort(buffercacherels, buffercacherel_count, sizeof(struct buffercacherel_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_buffercacherel_bufferid_callback(const void *v1, const void *v2)
 {
-	struct buffercacherel_t *n1, *n2;
+	struct buffercacherel_t *n1,
+			   *n2;
+
 	n1 = (struct buffercacherel_t *) v1;
 	n2 = (struct buffercacherel_t *) v2;
 
@@ -270,7 +300,9 @@ sort_buffercacherel_bufferid_callback(const void *v1, const void *v2)
 int
 sort_buffercacherel_relfilenode_callback(const void *v1, const void *v2)
 {
-	struct buffercacherel_t *n1, *n2;
+	struct buffercacherel_t *n1,
+			   *n2;
+
 	n1 = (struct buffercacherel_t *) v1;
 	n2 = (struct buffercacherel_t *) v2;
 
@@ -285,7 +317,9 @@ sort_buffercacherel_relfilenode_callback(const void *v1, const void *v2)
 int
 sort_buffercacherel_reltablespace_callback(const void *v1, const void *v2)
 {
-	struct buffercacherel_t *n1, *n2;
+	struct buffercacherel_t *n1,
+			   *n2;
+
 	n1 = (struct buffercacherel_t *) v1;
 	n2 = (struct buffercacherel_t *) v2;
 
@@ -300,7 +334,9 @@ sort_buffercacherel_reltablespace_callback(const void *v1, const void *v2)
 int
 sort_buffercacherel_reldatabase_callback(const void *v1, const void *v2)
 {
-	struct buffercacherel_t *n1, *n2;
+	struct buffercacherel_t *n1,
+			   *n2;
+
 	n1 = (struct buffercacherel_t *) v1;
 	n2 = (struct buffercacherel_t *) v2;
 
@@ -315,7 +351,9 @@ sort_buffercacherel_reldatabase_callback(const void *v1, const void *v2)
 int
 sort_buffercacherel_relforknumber_callback(const void *v1, const void *v2)
 {
-	struct buffercacherel_t *n1, *n2;
+	struct buffercacherel_t *n1,
+			   *n2;
+
 	n1 = (struct buffercacherel_t *) v1;
 	n2 = (struct buffercacherel_t *) v2;
 
@@ -330,7 +368,9 @@ sort_buffercacherel_relforknumber_callback(const void *v1, const void *v2)
 int
 sort_buffercacherel_relblocknumber_callback(const void *v1, const void *v2)
 {
-	struct buffercacherel_t *n1, *n2;
+	struct buffercacherel_t *n1,
+			   *n2;
+
 	n1 = (struct buffercacherel_t *) v1;
 	n2 = (struct buffercacherel_t *) v2;
 

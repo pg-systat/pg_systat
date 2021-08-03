@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <limits.h>
 #include <string.h>
 #include <unistd.h>
@@ -26,32 +26,45 @@
 struct dbfs_t
 {
 	RB_ENTRY(dbfs_t) entry;
-	char spcname[NAMEDATALEN + 1];
-	char path[PATH_MAX];
+	char		spcname[NAMEDATALEN + 1];
+	char		path[PATH_MAX];
 	struct statfs buf;
 	struct statfs buf_prev;
 };
 
-int dbfscmp(struct dbfs_t *, struct dbfs_t *);
+int			dbfscmp(struct dbfs_t *, struct dbfs_t *);
 static void dbfs_info(void);
-void print_dbfs(void);
-int read_dbfs(void);
-int select_dbfs(void);
-void sort_dbfs(void);
-int sort_dbfs_path_callback(const void *, const void *);
-int sort_dbfs_spcname_callback(const void *, const void *);
+void		print_dbfs(void);
+int			read_dbfs(void);
+int			select_dbfs(void);
+void		sort_dbfs(void);
+int			sort_dbfs_path_callback(const void *, const void *);
+int			sort_dbfs_spcname_callback(const void *, const void *);
 
 RB_HEAD(dbfs, dbfs_t) head_dbfss = RB_INITIALIZER(&head_dbfss);
 RB_PROTOTYPE(dbfs, dbfs_t, entry, dbfscmp)
 RB_GENERATE(dbfs, dbfs_t, entry, dbfscmp)
 
-field_def fields_dbfs[] = {
-	{ "TABLESPACE", 11, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "PATH", 5, PATH_MAX, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "SIZE", 5, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "AVAILABLE", 10, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "%USED", 6, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "CHANGE", 7, 6, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_dbfs[] =
+{
+	{
+		"TABLESPACE", 11, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"PATH", 5, PATH_MAX, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"SIZE", 5, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"AVAILABLE", 10, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"%USED", 6, 5, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"CHANGE", 7, 6, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_DBFS_SPCNAME     FIELD_ADDR(fields_dbfs, 0)
@@ -62,12 +75,12 @@ field_def fields_dbfs[] = {
 #define FLD_DBFS_CHANGE      FIELD_ADDR(fields_dbfs, 5)
 
 /* Define views */
-field_def *view_dbfs_0[] = {
+field_def  *view_dbfs_0[] = {
 	FLD_DBFS_SPCNAME, FLD_DBFS_PATH, FLD_DBFS_BLOCKS, FLD_DBFS_BAVAIL,
 	FLD_DBFS_BLOCKS_PER, FLD_DBFS_CHANGE, NULL
 };
 
-order_type dbfs_order_list[] = {
+order_type	dbfs_order_list[] = {
 	{"tablespace", "tablespace", 't', sort_dbfs_spcname_callback},
 	{"path", "path", 'p', sort_dbfs_path_callback},
 	{"size", "size", 'u', sort_dbfs_path_callback},
@@ -81,37 +94,44 @@ struct view_manager dbfs_mgr = {
 	print_dbfs, keyboard_callback, dbfs_order_list, dbfs_order_list
 };
 
-field_view views_dbfs[] = {
-	{ view_dbfs_0, "dbfs", 'D', &dbfs_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_dbfs[] = {
+	{view_dbfs_0, "dbfs", 'D', &dbfs_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	dbfs_count;
+int			dbfs_count;
 struct dbfs_t *dbfss;
 
 static void
 dbfs_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct dbfs_t *n, *p;
+	struct dbfs_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_DBFS);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = dbfs_count;
 			dbfs_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (dbfs_count > i) {
+	if (dbfs_count > i)
+	{
 		p = reallocarray(dbfss, dbfs_count, sizeof(struct dbfs_t));
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -121,9 +141,11 @@ dbfs_info(void)
 		dbfss = p;
 	}
 
-	for (i = 0; i < dbfs_count; i++) {
+	for (i = 0; i < dbfs_count; i++)
+	{
 		n = malloc(sizeof(struct dbfs_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -133,7 +155,8 @@ dbfs_info(void)
 
 		strncpy(n->spcname, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(dbfs, &head_dbfss, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -174,7 +197,7 @@ read_dbfs(void)
 int
 initdbfs(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	dbfss = NULL;
 	dbfs_count = 0;
@@ -184,35 +207,40 @@ initdbfs(void)
 
 	read_dbfs();
 
-	return(1);
+	return (1);
 }
 
 void
 print_dbfs(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < dbfs_count; i++) {
-		do {
-			long long avail = dbfss[i].buf.f_bavail * dbfss[i].buf.f_bsize;
-			long long avail_prev = dbfss[i].buf_prev.f_bavail *
-					dbfss[i].buf_prev.f_bsize;
+	for (i = 0; i < dbfs_count; i++)
+	{
+		do
+		{
+			long long	avail = dbfss[i].buf.f_bavail * dbfss[i].buf.f_bsize;
+			long long	avail_prev = dbfss[i].buf_prev.f_bavail *
+			dbfss[i].buf_prev.f_bsize;
 
 			unsigned int blocks_per;
-			blocks_per = dbfss[i].buf.f_blocks == 0 ? 1 :
-					100 * (dbfss[i].buf.f_blocks - dbfss[i].buf.f_bavail) /
-							dbfss[i].buf.f_blocks;
 
-			if (cur >= dispstart && cur < end) {
+			blocks_per = dbfss[i].buf.f_blocks == 0 ? 1 :
+				100 * (dbfss[i].buf.f_blocks - dbfss[i].buf.f_bavail) /
+				dbfss[i].buf.f_blocks;
+
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_DBFS_SPCNAME, dbfss[i].spcname);
 				print_fld_str(FLD_DBFS_PATH, dbfss[i].path);
 				print_fld_str(FLD_DBFS_BLOCKS,
-						format_b(dbfss[i].buf.f_blocks *
-								dbfss[i].buf.f_bsize));
+							  format_b(dbfss[i].buf.f_blocks *
+									   dbfss[i].buf.f_bsize));
 				print_fld_str(FLD_DBFS_BAVAIL, format_b(avail));
 				print_fld_uint(FLD_DBFS_BLOCKS_PER, blocks_per);
 				print_fld_str(FLD_DBFS_CHANGE, format_b(avail_prev - avail));
@@ -223,7 +251,8 @@ print_dbfs(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -256,11 +285,13 @@ sort_dbfs(void)
 int
 sort_dbfs_path_callback(const void *v1, const void *v2)
 {
-	struct dbfs_t *n1, *n2;
+	struct dbfs_t *n1,
+			   *n2;
+
 	n1 = (struct dbfs_t *) v1;
 	n2 = (struct dbfs_t *) v2;
 
-	int ret = strcmp(n1->path, n2->path);
+	int			ret = strcmp(n1->path, n2->path);
 
 	if (ret < 0)
 		return sortdir;
@@ -273,7 +304,9 @@ sort_dbfs_path_callback(const void *v1, const void *v2)
 int
 sort_dbfs_spcname_callback(const void *v1, const void *v2)
 {
-	struct dbfs_t *n1, *n2;
+	struct dbfs_t *n1,
+			   *n2;
+
 	n1 = (struct dbfs_t *) v1;
 	n2 = (struct dbfs_t *) v2;
 

@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -27,48 +27,67 @@
 struct vacuum_t
 {
 	RB_ENTRY(vacuum_t) entry;
-	long long pid;
-	char nspname[NAMEDATALEN + 1];
-	char relname[NAMEDATALEN + 1];
-	char phase[NAMEDATALEN + 1];
-	int64_t heap_blks_total;
-	int64_t heap_blks_scanned;
-	int64_t heap_blks_vacuumed;
-	int64_t index_vacuum_count;
-	int64_t max_dead_tuples;
-	int64_t num_dead_tuples;
+	long long	pid;
+	char		nspname[NAMEDATALEN + 1];
+	char		relname[NAMEDATALEN + 1];
+	char		phase[NAMEDATALEN + 1];
+	int64_t		heap_blks_total;
+	int64_t		heap_blks_scanned;
+	int64_t		heap_blks_vacuumed;
+	int64_t		index_vacuum_count;
+	int64_t		max_dead_tuples;
+	int64_t		num_dead_tuples;
 };
 
-int vacuumcmp(struct vacuum_t *, struct vacuum_t *);
+int			vacuumcmp(struct vacuum_t *, struct vacuum_t *);
 static void vacuum_info(void);
-void print_vacuum(void);
-int read_vacuum(void);
-int select_vacuum(void);
-void sort_vacuum(void);
-int sort_vacuum_nspname_callback(const void *, const void *);
-int sort_vacuum_phase_callback(const void *, const void *);
-int sort_vacuum_relname_callback(const void *, const void *);
-int sort_vacuum_heap_blks_scanned_callback(const void *, const void *);
-int sort_vacuum_heap_blks_total_callback(const void *, const void *);
-int sort_vacuum_heap_blks_vacuumed_callback(const void *, const void *);
-int sort_vacuum_index_vacuum_count_callback(const void *, const void *);
-int sort_vacuum_max_dead_tuples_callback(const void *, const void *);
-int sort_vacuum_num_dead_tuples_callback(const void *, const void *);
+void		print_vacuum(void);
+int			read_vacuum(void);
+int			select_vacuum(void);
+void		sort_vacuum(void);
+int			sort_vacuum_nspname_callback(const void *, const void *);
+int			sort_vacuum_phase_callback(const void *, const void *);
+int			sort_vacuum_relname_callback(const void *, const void *);
+int			sort_vacuum_heap_blks_scanned_callback(const void *, const void *);
+int			sort_vacuum_heap_blks_total_callback(const void *, const void *);
+int			sort_vacuum_heap_blks_vacuumed_callback(const void *, const void *);
+int			sort_vacuum_index_vacuum_count_callback(const void *, const void *);
+int			sort_vacuum_max_dead_tuples_callback(const void *, const void *);
+int			sort_vacuum_num_dead_tuples_callback(const void *, const void *);
 
 RB_HEAD(vacuum, vacuum_t) head_vacuums = RB_INITIALIZER(&head_vacuums);
 RB_PROTOTYPE(vacuum, vacuum_t, entry, vacuumcmp)
 RB_GENERATE(vacuum, vacuum_t, entry, vacuumcmp)
 
-field_def fields_vacuum[] = {
-	{ "SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "TABLENAME", 10, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "PHASE", 6, 25, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "HEAP_BLKS_TOTAL", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "HEAP_BLKS_SCANNED", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "HEAP_BLKS_VACUUMED", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "INDEX_VACUUM_COUNT", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "MAX_DEAD_TUPLES", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "NUM_DEAD_TUPLES", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_vacuum[] =
+{
+	{
+		"SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"TABLENAME", 10, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"PHASE", 6, 25, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"HEAP_BLKS_TOTAL", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"HEAP_BLKS_SCANNED", 10, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"HEAP_BLKS_VACUUMED", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"INDEX_VACUUM_COUNT", 11, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"MAX_DEAD_TUPLES", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"NUM_DEAD_TUPLES", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_VACUUM_NSPNAME            FIELD_ADDR(fields_vacuum, 0)
@@ -82,29 +101,29 @@ field_def fields_vacuum[] = {
 #define FLD_VACUUM_NUM_DEAD_TUPLES    FIELD_ADDR(fields_vacuum, 8)
 
 /* Define views */
-field_def *view_vacuum_0[] = {
-    FLD_VACUUM_NSPNAME, FLD_VACUUM_RELNAME, FLD_VACUUM_PHASE,
-    FLD_VACUUM_HEAP_BLKS_TOTAL, FLD_VACUUM_HEAP_BLKS_SCANNED,
-    FLD_VACUUM_HEAP_BLKS_VACUUMED, FLD_VACUUM_INDEX_VACUUM_COUNT,
-    FLD_VACUUM_MAX_DEAD_TUPLES, FLD_VACUUM_NUM_DEAD_TUPLES, NULL
+field_def  *view_vacuum_0[] = {
+	FLD_VACUUM_NSPNAME, FLD_VACUUM_RELNAME, FLD_VACUUM_PHASE,
+	FLD_VACUUM_HEAP_BLKS_TOTAL, FLD_VACUUM_HEAP_BLKS_SCANNED,
+	FLD_VACUUM_HEAP_BLKS_VACUUMED, FLD_VACUUM_INDEX_VACUUM_COUNT,
+	FLD_VACUUM_MAX_DEAD_TUPLES, FLD_VACUUM_NUM_DEAD_TUPLES, NULL
 };
 
-order_type vacuum_order_list[] = {
+order_type	vacuum_order_list[] = {
 	{"nspname", "nspname", 'n', sort_vacuum_nspname_callback},
 	{"relname", "relname", 'b', sort_vacuum_relname_callback},
 	{"phase", "phase", 'p', sort_vacuum_phase_callback},
 	{"heap_blks_total", "heap_blks_total", 't',
-            sort_vacuum_heap_blks_total_callback},
+	sort_vacuum_heap_blks_total_callback},
 	{"heap_blks_scanned", "heap_blks_scanned", 't',
-            sort_vacuum_heap_blks_scanned_callback},
+	sort_vacuum_heap_blks_scanned_callback},
 	{"heap_blks_vacuumed", "heap_blks_vacuumed", 't',
-            sort_vacuum_heap_blks_vacuumed_callback},
+	sort_vacuum_heap_blks_vacuumed_callback},
 	{"index_vacuum_count", "index_vacuum_count", 't',
-            sort_vacuum_index_vacuum_count_callback},
+	sort_vacuum_index_vacuum_count_callback},
 	{"max_dead_tuples", "max_dead_tuples", 't',
-            sort_vacuum_max_dead_tuples_callback},
+	sort_vacuum_max_dead_tuples_callback},
 	{"num_dead_tuples", "num_dead_tuples", 't',
-            sort_vacuum_num_dead_tuples_callback},
+	sort_vacuum_num_dead_tuples_callback},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -114,42 +133,51 @@ struct view_manager vacuum_mgr = {
 	print_vacuum, keyboard_callback, vacuum_order_list, vacuum_order_list
 };
 
-field_view views_vacuum[] = {
-	{ view_vacuum_0, "vacuum", 'V', &vacuum_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_vacuum[] = {
+	{view_vacuum_0, "vacuum", 'V', &vacuum_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	vacuum_count;
+int			vacuum_count;
 struct vacuum_t *vacuums;
 
 static void
 vacuum_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct vacuum_t *n, *p;
+	struct vacuum_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_DBXACT);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = vacuum_count;
 			vacuum_count = PQntuples(pgresult);
-		} else {
+		}
+		else
+		{
 			if (strcmp(PQresultErrorField(pgresult,
-					PG_DIAG_SQLSTATE), "42P01") == 0)
+										  PG_DIAG_SQLSTATE), "42P01") == 0)
 				error("PostgreSQL 9.6+ required for vacuum view");
 			return;
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (vacuum_count > i) {
+	if (vacuum_count > i)
+	{
 		p = reallocarray(vacuums, vacuum_count, sizeof(struct vacuum_t));
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -159,9 +187,11 @@ vacuum_info(void)
 		vacuums = p;
 	}
 
-	for (i = 0; i < vacuum_count; i++) {
+	for (i = 0; i < vacuum_count; i++)
+	{
 		n = malloc(sizeof(struct vacuum_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -170,7 +200,8 @@ vacuum_info(void)
 		}
 		n->pid = atoll(PQgetvalue(pgresult, i, 0));
 		p = RB_INSERT(vacuum, &head_vacuums, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -215,7 +246,7 @@ read_vacuum(void)
 int
 initvacuum(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	vacuums = NULL;
 	vacuum_count = 0;
@@ -225,35 +256,39 @@ initvacuum(void)
 
 	read_vacuum();
 
-	return(1);
+	return (1);
 }
 
 void
 print_vacuum(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < vacuum_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < vacuum_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_VACUUM_NSPNAME, vacuums[i].nspname);
 				print_fld_str(FLD_VACUUM_RELNAME, vacuums[i].relname);
 				print_fld_ssize(FLD_VACUUM_HEAP_BLKS_TOTAL,
-						vacuums[i].heap_blks_total);
+								vacuums[i].heap_blks_total);
 				print_fld_ssize(FLD_VACUUM_HEAP_BLKS_SCANNED,
-						vacuums[i].heap_blks_scanned);
+								vacuums[i].heap_blks_scanned);
 				print_fld_ssize(FLD_VACUUM_HEAP_BLKS_VACUUMED,
-						vacuums[i].heap_blks_vacuumed);
+								vacuums[i].heap_blks_vacuumed);
 				print_fld_ssize(FLD_VACUUM_INDEX_VACUUM_COUNT,
-						vacuums[i].index_vacuum_count);
+								vacuums[i].index_vacuum_count);
 				print_fld_ssize(FLD_VACUUM_MAX_DEAD_TUPLES,
-						vacuums[i].max_dead_tuples);
+								vacuums[i].max_dead_tuples);
 				print_fld_ssize(FLD_VACUUM_NUM_DEAD_TUPLES,
-						vacuums[i].num_dead_tuples);
+								vacuums[i].num_dead_tuples);
 				end_line();
 			}
 			if (++cur >= end)
@@ -261,7 +296,8 @@ print_vacuum(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -294,7 +330,9 @@ sort_vacuum(void)
 int
 sort_vacuum_nspname_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -304,7 +342,9 @@ sort_vacuum_nspname_callback(const void *v1, const void *v2)
 int
 sort_vacuum_phase_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -319,7 +359,9 @@ sort_vacuum_phase_callback(const void *v1, const void *v2)
 int
 sort_vacuum_relname_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -334,7 +376,9 @@ sort_vacuum_relname_callback(const void *v1, const void *v2)
 int
 sort_vacuum_heap_blks_scanned_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -349,7 +393,9 @@ sort_vacuum_heap_blks_scanned_callback(const void *v1, const void *v2)
 int
 sort_vacuum_heap_blks_total_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -364,7 +410,9 @@ sort_vacuum_heap_blks_total_callback(const void *v1, const void *v2)
 int
 sort_vacuum_heap_blks_vacuumed_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -379,7 +427,9 @@ sort_vacuum_heap_blks_vacuumed_callback(const void *v1, const void *v2)
 int
 sort_vacuum_index_vacuum_count_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -394,7 +444,9 @@ sort_vacuum_index_vacuum_count_callback(const void *v1, const void *v2)
 int
 sort_vacuum_max_dead_tuples_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 
@@ -409,7 +461,9 @@ sort_vacuum_max_dead_tuples_callback(const void *v1, const void *v2)
 int
 sort_vacuum_num_dead_tuples_callback(const void *v1, const void *v2)
 {
-	struct vacuum_t *n1, *n2;
+	struct vacuum_t *n1,
+			   *n2;
+
 	n1 = (struct vacuum_t *) v1;
 	n2 = (struct vacuum_t *) v2;
 

@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -27,43 +27,58 @@ struct stmtexec_t
 {
 	RB_ENTRY(stmtexec_t) entry;
 
-	char queryid[NAMEDATALEN+1];
-	int64_t calls;
-	double total_exec_time;
-	double min_exec_time;
-	double max_exec_time;
-	double mean_exec_time;
-	double stddev_exec_time;
+	char		queryid[NAMEDATALEN + 1];
+	int64_t		calls;
+	double		total_exec_time;
+	double		min_exec_time;
+	double		max_exec_time;
+	double		mean_exec_time;
+	double		stddev_exec_time;
 
 };
 
-int stmtexec_cmp(struct stmtexec_t *, struct stmtexec_t *);
+int			stmtexec_cmp(struct stmtexec_t *, struct stmtexec_t *);
 static void stmtexec_info(void);
-void print_stmtexec(void);
-int read_stmtexec(void);
-int select_stmtexec(void);
-void sort_stmtexec(void);
-int sort_stmtexec_queryid_callback(const void *, const void *);
-int sort_stmtexec_calls_callback(const void *, const void *);
-int sort_stmtexec_total_exec_time_callback(const void *, const void *);
-int sort_stmtexec_min_exec_time_callback(const void *, const void *);
-int sort_stmtexec_max_exec_time_callback(const void *, const void *);
-int sort_stmtexec_mean_exec_time_callback(const void *, const void *);
-int sort_stmtexec_stddev_exec_time_callback(const void *, const void *);
+void		print_stmtexec(void);
+int			read_stmtexec(void);
+int			select_stmtexec(void);
+void		sort_stmtexec(void);
+int			sort_stmtexec_queryid_callback(const void *, const void *);
+int			sort_stmtexec_calls_callback(const void *, const void *);
+int			sort_stmtexec_total_exec_time_callback(const void *, const void *);
+int			sort_stmtexec_min_exec_time_callback(const void *, const void *);
+int			sort_stmtexec_max_exec_time_callback(const void *, const void *);
+int			sort_stmtexec_mean_exec_time_callback(const void *, const void *);
+int			sort_stmtexec_stddev_exec_time_callback(const void *, const void *);
 
 RB_HEAD(stmtexec, stmtexec_t) head_stmtexecs =
-    RB_INITIALIZER(&head_stmtexecs);
+RB_INITIALIZER(&head_stmtexecs);
 RB_PROTOTYPE(stmtexec, stmtexec_t, entry, stmtexec_cmp)
 RB_GENERATE(stmtexec, stmtexec_t, entry, stmtexec_cmp)
 
-field_def fields_stmtexec[] = {
-	{ "QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "CALLS", 6, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TOTAL_EXEC_TIME", 16, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "MIN_EXEC_TIME", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "MAX_EXEC_TIME", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "MEAN_EXEC_TIME", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "STDDEV_EXEC_TIME", 17, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_stmtexec[] =
+{
+	{
+		"QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"CALLS", 6, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TOTAL_EXEC_TIME", 16, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"MIN_EXEC_TIME", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"MAX_EXEC_TIME", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"MEAN_EXEC_TIME", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"STDDEV_EXEC_TIME", 17, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_STMT_QUERYID        FIELD_ADDR(fields_stmtexec, 0)
@@ -75,18 +90,18 @@ field_def fields_stmtexec[] = {
 #define FLD_STMT_STDDEV_EXEC_TIME FIELD_ADDR(fields_stmtexec, 6)
 
 /* Define views */
-field_def *view_stmtexec_0[] = {
+field_def  *view_stmtexec_0[] = {
 	FLD_STMT_QUERYID, FLD_STMT_CALLS, FLD_STMT_TOTAL_EXEC_TIME,
 	FLD_STMT_MIN_EXEC_TIME, FLD_STMT_MAX_EXEC_TIME, FLD_STMT_MEAN_EXEC_TIME,
 	FLD_STMT_STDDEV_EXEC_TIME, NULL
 };
 
-order_type stmtexec_order_list[] = {
+order_type	stmtexec_order_list[] = {
 	{"queryid", "queryid", 'u', sort_stmtexec_queryid_callback},
 	{"calls", "execs", 'c', sort_stmtexec_calls_callback},
 	{"total_exec_time", "total_exec_time", 't', sort_stmtexec_total_exec_time_callback},
 	{"min_exec_time", "min_exec_time", 'n',
-			sort_stmtexec_min_exec_time_callback},
+	sort_stmtexec_min_exec_time_callback},
 	{"max_exec_time", "max_exec_time", 'm', sort_stmtexec_max_exec_time_callback},
 	{"mean_exec_time", "mean_exec_time", 'e', sort_stmtexec_mean_exec_time_callback},
 	{"stddev_exec_time", "stddev_exec_time", 'd', sort_stmtexec_stddev_exec_time_callback},
@@ -100,51 +115,62 @@ struct view_manager stmtexec_mgr = {
 	stmtexec_order_list
 };
 
-field_view views_stmtexec[] = {
-	{ view_stmtexec_0, "stmtexec", 'P', &stmtexec_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_stmtexec[] = {
+	{view_stmtexec_0, "stmtexec", 'P', &stmtexec_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int stmtexec_exist = 1;
-int	stmtexec_count;
+int			stmtexec_exist = 1;
+int			stmtexec_count;
 struct stmtexec_t *stmtexecs;
 
 static void
 stmtexec_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct stmtexec_t *n, *p;
+	struct stmtexec_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
-		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0)
+		{
 			stmtexec_exist = 0;
 			PQclear(pgresult);
 			return;
 		}
 
-		if(PQserverVersion(options.connection) / 100 < 1300){
+		if (PQserverVersion(options.connection) / 100 < 1300)
+		{
 			pgresult = PQexec(options.connection, QUERY_STAT_EXEC_12);
-		} else {
-		    pgresult = PQexec(options.connection, QUERY_STAT_EXEC_13);
-        }
+		}
+		else
+		{
+			pgresult = PQexec(options.connection, QUERY_STAT_EXEC_13);
+		}
 
-        if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = stmtexec_count;
 			stmtexec_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (stmtexec_count > i) {
+	if (stmtexec_count > i)
+	{
 		p = reallocarray(stmtexecs, stmtexec_count,
-				sizeof(struct stmtexec_t));
-		if (p == NULL) {
+						 sizeof(struct stmtexec_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -154,9 +180,11 @@ stmtexec_info(void)
 		stmtexecs = p;
 	}
 
-	for (i = 0; i < stmtexec_count; i++) {
+	for (i = 0; i < stmtexec_count; i++)
+	{
 		n = malloc(sizeof(struct stmtexec_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -165,7 +193,8 @@ stmtexec_info(void)
 		}
 		strncpy(n->queryid, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(stmtexec, &head_stmtexecs, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -187,7 +216,7 @@ stmtexec_info(void)
 int
 stmtexec_cmp(struct stmtexec_t *e1, struct stmtexec_t *e2)
 {
-  return (e1->queryid< e2->queryid ? -1 : e1->queryid > e2->queryid);
+	return (e1->queryid < e2->queryid ? -1 : e1->queryid > e2->queryid);
 }
 
 int
@@ -207,46 +236,51 @@ read_stmtexec(void)
 int
 initstmtexec(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	stmtexecs = NULL;
 	stmtexec_count = 0;
 
 	read_stmtexec();
-	if(stmtexec_exist == 0){
+	if (stmtexec_exist == 0)
+	{
 		return 0;
 	}
 
 	for (v = views_stmtexec; v->name != NULL; v++)
 		add_view(v);
 
-	return(1);
+	return (1);
 }
 
 void
 print_stmtexec(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < stmtexec_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < stmtexec_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_STMT_QUERYID, stmtexecs[i].queryid);
-            			print_fld_uint(FLD_STMT_CALLS, stmtexecs[i].calls);
+				print_fld_uint(FLD_STMT_CALLS, stmtexecs[i].calls);
 				print_fld_float(FLD_STMT_TOTAL_EXEC_TIME,
-						stmtexecs[i].total_exec_time,2);
+								stmtexecs[i].total_exec_time, 2);
 				print_fld_float(FLD_STMT_MIN_EXEC_TIME,
-						stmtexecs[i].min_exec_time,2);
+								stmtexecs[i].min_exec_time, 2);
 				print_fld_float(FLD_STMT_MAX_EXEC_TIME,
-						stmtexecs[i].max_exec_time,2);
+								stmtexecs[i].max_exec_time, 2);
 				print_fld_float(FLD_STMT_MEAN_EXEC_TIME,
-						stmtexecs[i].mean_exec_time,2);
+								stmtexecs[i].mean_exec_time, 2);
 				print_fld_float(FLD_STMT_STDDEV_EXEC_TIME,
-						stmtexecs[i].stddev_exec_time,2);
+								stmtexecs[i].stddev_exec_time, 2);
 				end_line();
 			}
 			if (++cur >= end)
@@ -254,7 +288,8 @@ print_stmtexec(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -282,13 +317,15 @@ sort_stmtexec(void)
 		return;
 
 	mergesort(stmtexecs, stmtexec_count, sizeof(struct stmtexec_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_stmtexec_queryid_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 
@@ -298,7 +335,9 @@ sort_stmtexec_queryid_callback(const void *v1, const void *v2)
 int
 sort_stmtexec_calls_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 
@@ -313,7 +352,9 @@ sort_stmtexec_calls_callback(const void *v1, const void *v2)
 int
 sort_stmtexec_total_exec_time_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 
@@ -328,7 +369,9 @@ sort_stmtexec_total_exec_time_callback(const void *v1, const void *v2)
 int
 sort_stmtexec_min_exec_time_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 
@@ -343,7 +386,9 @@ sort_stmtexec_min_exec_time_callback(const void *v1, const void *v2)
 int
 sort_stmtexec_max_exec_time_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 
@@ -358,7 +403,9 @@ sort_stmtexec_max_exec_time_callback(const void *v1, const void *v2)
 int
 sort_stmtexec_mean_exec_time_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 
@@ -373,7 +420,9 @@ sort_stmtexec_mean_exec_time_callback(const void *v1, const void *v2)
 int
 sort_stmtexec_stddev_exec_time_callback(const void *v1, const void *v2)
 {
-	struct stmtexec_t *n1, *n2;
+	struct stmtexec_t *n1,
+			   *n2;
+
 	n1 = (struct stmtexec_t *) v1;
 	n2 = (struct stmtexec_t *) v2;
 

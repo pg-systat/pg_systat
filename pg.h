@@ -23,15 +23,15 @@ enum pgparams
 
 struct adhoc_opts
 {
-	int persistent;
-	PGconn *connection;
+	int			persistent;
+	PGconn	   *connection;
 	const char *values[6];
 };
 
 extern struct adhoc_opts options;
 
-void connect_to_db();
-void disconnect_from_db();
-int pg_version();
+void		connect_to_db();
+void		disconnect_from_db();
+int			pg_version();
 
-#endif /* _PG_H_ */
+#endif							/* _PG_H_ */

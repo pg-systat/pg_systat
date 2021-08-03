@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -23,40 +23,53 @@ struct stmtlocalblk_t
 {
 	RB_ENTRY(stmtlocalblk_t) entry;
 
-	char queryid[NAMEDATALEN+1];
-	int64_t rows;
-	int64_t local_blks_hit;
-	int64_t local_blks_read;
-	int64_t local_blks_dirtied;
-	int64_t local_blks_written;
+	char		queryid[NAMEDATALEN + 1];
+	int64_t		rows;
+	int64_t		local_blks_hit;
+	int64_t		local_blks_read;
+	int64_t		local_blks_dirtied;
+	int64_t		local_blks_written;
 
 };
 
-int stmtlocalblk_cmp(struct stmtlocalblk_t *, struct stmtlocalblk_t *);
+int			stmtlocalblk_cmp(struct stmtlocalblk_t *, struct stmtlocalblk_t *);
 static void stmtlocalblk_info(void);
-void print_stmtlocalblk(void);
-int read_stmtlocalblk(void);
-int select_stmtlocalblk(void);
-void sort_stmtlocalblk(void);
-int sort_stmtlocalblk_queryid_callback(const void *, const void *);
-int sort_stmtlocalblk_rows_callback(const void *, const void *);
-int sort_stmtlocalblk_local_blks_hit_callback(const void *, const void *);
-int sort_stmtlocalblk_local_blks_read_callback(const void *, const void *);
-int sort_stmtlocalblk_local_blks_dirtied_callback(const void *, const void *);
-int sort_stmtlocalblk_local_blks_written_callback(const void *, const void *);
+void		print_stmtlocalblk(void);
+int			read_stmtlocalblk(void);
+int			select_stmtlocalblk(void);
+void		sort_stmtlocalblk(void);
+int			sort_stmtlocalblk_queryid_callback(const void *, const void *);
+int			sort_stmtlocalblk_rows_callback(const void *, const void *);
+int			sort_stmtlocalblk_local_blks_hit_callback(const void *, const void *);
+int			sort_stmtlocalblk_local_blks_read_callback(const void *, const void *);
+int			sort_stmtlocalblk_local_blks_dirtied_callback(const void *, const void *);
+int			sort_stmtlocalblk_local_blks_written_callback(const void *, const void *);
 
 RB_HEAD(stmtlocalblk, stmtlocalblk_t) head_stmtlocalblks =
-    RB_INITIALIZER(&head_stmtlocalblks);
+RB_INITIALIZER(&head_stmtlocalblks);
 RB_PROTOTYPE(stmtlocalblk, stmtlocalblk_t, entry, stmtlocalblk_cmp)
 RB_GENERATE(stmtlocalblk, stmtlocalblk_t, entry, stmtlocalblk_cmp)
 
-field_def fields_stmtlocalblk[] = {
-	{ "QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "ROWS", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "LOCAL_BLK_HIT", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "LOCAL_BLK_READ", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "LOCAL_BLK_DIRTIED", 18, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "LOCAL_BLK_WRITTEN", 18, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_stmtlocalblk[] =
+{
+	{
+		"QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"ROWS", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"LOCAL_BLK_HIT", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"LOCAL_BLK_READ", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"LOCAL_BLK_DIRTIED", 18, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"LOCAL_BLK_WRITTEN", 18, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_STMT_QUERYID        FIELD_ADDR(fields_stmtlocalblk, 0)
@@ -67,17 +80,17 @@ field_def fields_stmtlocalblk[] = {
 #define FLD_STMT_LOCAL_BLKS_WRITTEN FIELD_ADDR(fields_stmtlocalblk, 5)
 
 /* Define views */
-field_def *view_stmtlocalblk_0[] = {
+field_def  *view_stmtlocalblk_0[] = {
 	FLD_STMT_QUERYID, FLD_STMT_ROWS, FLD_STMT_LOCAL_BLKS_HIT,
 	FLD_STMT_LOCAL_BLKS_READ, FLD_STMT_LOCAL_BLKS_DIRTIED, FLD_STMT_LOCAL_BLKS_WRITTEN, NULL
 };
 
-order_type stmtlocalblk_order_list[] = {
+order_type	stmtlocalblk_order_list[] = {
 	{"queryid", "queryid", 'u', sort_stmtlocalblk_queryid_callback},
 	{"rows", "rows", 'r', sort_stmtlocalblk_rows_callback},
 	{"local_blk_hits", "local_blk_hits", 'i', sort_stmtlocalblk_local_blks_hit_callback},
 	{"local_blk_read", "local_blk_read", 'e',
-			sort_stmtlocalblk_local_blks_read_callback},
+	sort_stmtlocalblk_local_blks_read_callback},
 	{"local_blk_dirtied", "local_blk_dirtied", 'd', sort_stmtlocalblk_local_blks_dirtied_callback},
 	{"local_blk_written", "local_blk_written", 'w', sort_stmtlocalblk_local_blks_written_callback},
 	{NULL, NULL, 0, NULL}
@@ -90,46 +103,54 @@ struct view_manager stmtlocalblk_mgr = {
 	stmtlocalblk_order_list
 };
 
-field_view views_stmtlocalblk[] = {
-	{ view_stmtlocalblk_0, "stmtlocalblk", 'P', &stmtlocalblk_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_stmtlocalblk[] = {
+	{view_stmtlocalblk_0, "stmtlocalblk", 'P', &stmtlocalblk_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int stmtlocalblk_exist = 1;
-int	stmtlocalblk_count;
+int			stmtlocalblk_exist = 1;
+int			stmtlocalblk_count;
 struct stmtlocalblk_t *stmtlocalblks;
 
 static void
 stmtlocalblk_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct stmtlocalblk_t *n, *p;
+	struct stmtlocalblk_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
-		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0)
+		{
 			stmtlocalblk_exist = 0;
 			PQclear(pgresult);
 			return;
 		}
 
 		pgresult = PQexec(options.connection, QUERY_STAT_LOCAL_BLK);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = stmtlocalblk_count;
 			stmtlocalblk_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (stmtlocalblk_count > i) {
+	if (stmtlocalblk_count > i)
+	{
 		p = reallocarray(stmtlocalblks, stmtlocalblk_count,
-				sizeof(struct stmtlocalblk_t));
-		if (p == NULL) {
+						 sizeof(struct stmtlocalblk_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -139,9 +160,11 @@ stmtlocalblk_info(void)
 		stmtlocalblks = p;
 	}
 
-	for (i = 0; i < stmtlocalblk_count; i++) {
+	for (i = 0; i < stmtlocalblk_count; i++)
+	{
 		n = malloc(sizeof(struct stmtlocalblk_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -150,7 +173,8 @@ stmtlocalblk_info(void)
 		}
 		strncpy(n->queryid, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(stmtlocalblk, &head_stmtlocalblks, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -171,7 +195,7 @@ stmtlocalblk_info(void)
 int
 stmtlocalblk_cmp(struct stmtlocalblk_t *e1, struct stmtlocalblk_t *e2)
 {
-  return (e1->queryid< e2->queryid ? -1 : e1->queryid > e2->queryid);
+	return (e1->queryid < e2->queryid ? -1 : e1->queryid > e2->queryid);
 }
 
 int
@@ -191,44 +215,49 @@ read_stmtlocalblk(void)
 int
 initstmtlocalblk(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	stmtlocalblks = NULL;
 	stmtlocalblk_count = 0;
 
 	read_stmtlocalblk();
-	if(stmtlocalblk_exist == 0){
+	if (stmtlocalblk_exist == 0)
+	{
 		return 0;
 	}
 
 	for (v = views_stmtlocalblk; v->name != NULL; v++)
 		add_view(v);
 
-	return(1);
+	return (1);
 }
 
 void
 print_stmtlocalblk(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < stmtlocalblk_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < stmtlocalblk_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_STMT_QUERYID, stmtlocalblks[i].queryid);
-            			print_fld_uint(FLD_STMT_ROWS, stmtlocalblks[i].rows);
+				print_fld_uint(FLD_STMT_ROWS, stmtlocalblks[i].rows);
 				print_fld_uint(FLD_STMT_LOCAL_BLKS_HIT,
-						stmtlocalblks[i].local_blks_hit);
+							   stmtlocalblks[i].local_blks_hit);
 				print_fld_uint(FLD_STMT_LOCAL_BLKS_READ,
-						stmtlocalblks[i].local_blks_read);
+							   stmtlocalblks[i].local_blks_read);
 				print_fld_uint(FLD_STMT_LOCAL_BLKS_DIRTIED,
-						stmtlocalblks[i].local_blks_dirtied);
+							   stmtlocalblks[i].local_blks_dirtied);
 				print_fld_uint(FLD_STMT_LOCAL_BLKS_WRITTEN,
-						stmtlocalblks[i].local_blks_written);
+							   stmtlocalblks[i].local_blks_written);
 				end_line();
 			}
 			if (++cur >= end)
@@ -236,7 +265,8 @@ print_stmtlocalblk(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -264,13 +294,15 @@ sort_stmtlocalblk(void)
 		return;
 
 	mergesort(stmtlocalblks, stmtlocalblk_count, sizeof(struct stmtlocalblk_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_stmtlocalblk_queryid_callback(const void *v1, const void *v2)
 {
-	struct stmtlocalblk_t *n1, *n2;
+	struct stmtlocalblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmtlocalblk_t *) v1;
 	n2 = (struct stmtlocalblk_t *) v2;
 
@@ -280,7 +312,9 @@ sort_stmtlocalblk_queryid_callback(const void *v1, const void *v2)
 int
 sort_stmtlocalblk_rows_callback(const void *v1, const void *v2)
 {
-	struct stmtlocalblk_t *n1, *n2;
+	struct stmtlocalblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmtlocalblk_t *) v1;
 	n2 = (struct stmtlocalblk_t *) v2;
 
@@ -295,7 +329,9 @@ sort_stmtlocalblk_rows_callback(const void *v1, const void *v2)
 int
 sort_stmtlocalblk_local_blks_hit_callback(const void *v1, const void *v2)
 {
-	struct stmtlocalblk_t *n1, *n2;
+	struct stmtlocalblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmtlocalblk_t *) v1;
 	n2 = (struct stmtlocalblk_t *) v2;
 
@@ -310,7 +346,9 @@ sort_stmtlocalblk_local_blks_hit_callback(const void *v1, const void *v2)
 int
 sort_stmtlocalblk_local_blks_read_callback(const void *v1, const void *v2)
 {
-	struct stmtlocalblk_t *n1, *n2;
+	struct stmtlocalblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmtlocalblk_t *) v1;
 	n2 = (struct stmtlocalblk_t *) v2;
 
@@ -325,7 +363,9 @@ sort_stmtlocalblk_local_blks_read_callback(const void *v1, const void *v2)
 int
 sort_stmtlocalblk_local_blks_dirtied_callback(const void *v1, const void *v2)
 {
-	struct stmtlocalblk_t *n1, *n2;
+	struct stmtlocalblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmtlocalblk_t *) v1;
 	n2 = (struct stmtlocalblk_t *) v2;
 
@@ -340,7 +380,9 @@ sort_stmtlocalblk_local_blks_dirtied_callback(const void *v1, const void *v2)
 int
 sort_stmtlocalblk_local_blks_written_callback(const void *v1, const void *v2)
 {
-	struct stmtlocalblk_t *n1, *n2;
+	struct stmtlocalblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmtlocalblk_t *) v1;
 	n2 = (struct stmtlocalblk_t *) v2;
 

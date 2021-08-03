@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -23,51 +23,68 @@
 struct dbtup_t
 {
 	RB_ENTRY(dbtup_t) entry;
-	long long datid;
-	char datname[NAMEDATALEN + 1];
-	int64_t tup_returned;
-	int64_t tup_returned_diff;
-	int64_t tup_returned_old;
-	int64_t tup_fetched;
-	int64_t tup_fetched_diff;
-	int64_t tup_fetched_old;
-	int64_t tup_inserted;
-	int64_t tup_inserted_diff;
-	int64_t tup_inserted_old;
-	int64_t tup_updated;
-	int64_t tup_updated_diff;
-	int64_t tup_updated_old;
-	int64_t tup_deleted;
-	int64_t tup_deleted_diff;
-	int64_t tup_deleted_old;
+	long long	datid;
+	char		datname[NAMEDATALEN + 1];
+	int64_t		tup_returned;
+	int64_t		tup_returned_diff;
+	int64_t		tup_returned_old;
+	int64_t		tup_fetched;
+	int64_t		tup_fetched_diff;
+	int64_t		tup_fetched_old;
+	int64_t		tup_inserted;
+	int64_t		tup_inserted_diff;
+	int64_t		tup_inserted_old;
+	int64_t		tup_updated;
+	int64_t		tup_updated_diff;
+	int64_t		tup_updated_old;
+	int64_t		tup_deleted;
+	int64_t		tup_deleted_diff;
+	int64_t		tup_deleted_old;
 };
 
-int dbtupcmp(struct dbtup_t *, struct dbtup_t *);
-void print_dbtup(void);
-int read_dbtup(void);
-int select_dbtup(void);
+int			dbtupcmp(struct dbtup_t *, struct dbtup_t *);
+void		print_dbtup(void);
+int			read_dbtup(void);
+int			select_dbtup(void);
 static void dbtup_info(void);
-void sort_dbtup(void);
-int sort_dbtup_datname_callback(const void *, const void *);
-int sort_dbtup_deleted_callback(const void *, const void *);
-int sort_dbtup_fetched_callback(const void *, const void *);
-int sort_dbtup_inserted_callback(const void *, const void *);
-int sort_dbtup_returned_callback(const void *, const void *);
-int sort_dbtup_updated_callback(const void *, const void *);
+void		sort_dbtup(void);
+int			sort_dbtup_datname_callback(const void *, const void *);
+int			sort_dbtup_deleted_callback(const void *, const void *);
+int			sort_dbtup_fetched_callback(const void *, const void *);
+int			sort_dbtup_inserted_callback(const void *, const void *);
+int			sort_dbtup_returned_callback(const void *, const void *);
+int			sort_dbtup_updated_callback(const void *, const void *);
 
 RB_HEAD(dbtup, dbtup_t) head_dbtups = RB_INITIALIZER(&head_dbtups);
 RB_PROTOTYPE(dbtup, dbtup_t, entry, dbtupcmp)
 RB_GENERATE(dbtup, dbtup_t, entry, dbtupcmp)
 
-field_def fields_dbtup[] = {
-	{ "DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "R/s", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "W/s", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "RETURNED", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "FETCHED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "INSERTED", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "UPDATED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "DELETED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_dbtup[] =
+{
+	{
+		"DATABASE", 9, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"R/s", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"W/s", 4, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"RETURNED", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"FETCHED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"INSERTED", 9, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"UPDATED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"DELETED", 8, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_DB_DATNAME       FIELD_ADDR(fields_dbtup, 0)
@@ -80,13 +97,13 @@ field_def fields_dbtup[] = {
 #define FLD_DB_TUP_DELETED   FIELD_ADDR(fields_dbtup, 7)
 
 /* Define views */
-field_def *view_dbtup_0[] = {
+field_def  *view_dbtup_0[] = {
 	FLD_DB_DATNAME, FLD_DB_TUP_R_S, FLD_DB_TUP_W_S, FLD_DB_TUP_RETURNED,
 	FLD_DB_TUP_FETCHED, FLD_DB_TUP_INSERTED, FLD_DB_TUP_UPDATED,
 	FLD_DB_TUP_DELETED, NULL
 };
 
-order_type dbtup_order_list[] = {
+order_type	dbtup_order_list[] = {
 	{"datname", "datname", 'n', sort_dbtup_datname_callback},
 	{"tup_returned", "tup_returned", 'r', sort_dbtup_returned_callback},
 	{"tup_fetched", "tup_fetched", 'f', sort_dbtup_fetched_callback},
@@ -102,37 +119,44 @@ struct view_manager dbtup_mgr = {
 	keyboard_callback, dbtup_order_list, dbtup_order_list
 };
 
-field_view views_dbtup[] = {
-	{ view_dbtup_0, "dbtup", 'T', &dbtup_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_dbtup[] = {
+	{view_dbtup_0, "dbtup", 'T', &dbtup_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	  dbtup_count;
+int			dbtup_count;
 struct dbtup_t *dbtups;
 
 static void
 dbtup_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct dbtup_t *n, *p;
+	struct dbtup_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_DBTUP);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = dbtup_count;
 			dbtup_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (dbtup_count > i) {
+	if (dbtup_count > i)
+	{
 		p = reallocarray(dbtups, dbtup_count, sizeof(struct dbtup_t));
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -142,9 +166,11 @@ dbtup_info(void)
 		dbtups = p;
 	}
 
-	for (i = 0; i < dbtup_count; i++) {
+	for (i = 0; i < dbtup_count; i++)
+	{
 		n = malloc(sizeof(struct dbtup_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -155,7 +181,8 @@ dbtup_info(void)
 		p = RB_INSERT(dbtup, &head_dbtups, n);
 		if (p == NULL)
 			strncpy(n->datname, PQgetvalue(pgresult, i, 1), NAMEDATALEN);
-		else {
+		else
+		{
 			free(n);
 			n = p;
 		}
@@ -210,7 +237,7 @@ read_dbtup(void)
 int
 initdbtup(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	dbtups = NULL;
 	dbtup_count = 0;
@@ -220,40 +247,44 @@ initdbtup(void)
 
 	read_dbtup();
 
-	return(1);
+	return (1);
 }
 
 void
 print_dbtup(void)
 {
-	int		cur = 0, i;
-	int		end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < dbtup_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < dbtup_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_DB_DATNAME, dbtups[i].datname);
 				print_fld_ssize(FLD_DB_TUP_R_S,
-						dbtups[i].tup_returned_diff /
+								dbtups[i].tup_returned_diff /
 								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_TUP_W_S,
-						(dbtups[i].tup_inserted_diff +
-						dbtups[i].tup_updated_diff +
-						dbtups[i].tup_deleted_diff) /
-						((int64_t) udelay / 1000000));
+								(dbtups[i].tup_inserted_diff +
+								 dbtups[i].tup_updated_diff +
+								 dbtups[i].tup_deleted_diff) /
+								((int64_t) udelay / 1000000));
 				print_fld_ssize(FLD_DB_TUP_RETURNED,
-						dbtups[i].tup_returned_diff);
+								dbtups[i].tup_returned_diff);
 				print_fld_ssize(FLD_DB_TUP_FETCHED,
-						dbtups[i].tup_fetched_diff);
+								dbtups[i].tup_fetched_diff);
 				print_fld_ssize(FLD_DB_TUP_INSERTED,
-						dbtups[i].tup_inserted_diff);
+								dbtups[i].tup_inserted_diff);
 				print_fld_ssize(FLD_DB_TUP_UPDATED,
-						dbtups[i].tup_updated_diff);
+								dbtups[i].tup_updated_diff);
 				print_fld_ssize(FLD_DB_TUP_DELETED,
-						dbtups[i].tup_deleted_diff);
+								dbtups[i].tup_deleted_diff);
 				end_line();
 			}
 			if (++cur >= end)
@@ -261,7 +292,8 @@ print_dbtup(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -293,7 +325,9 @@ sort_dbtup(void)
 int
 sort_dbtup_datname_callback(const void *v1, const void *v2)
 {
-	struct dbtup_t *n1, *n2;
+	struct dbtup_t *n1,
+			   *n2;
+
 	n1 = (struct dbtup_t *) v1;
 	n2 = (struct dbtup_t *) v2;
 
@@ -303,7 +337,9 @@ sort_dbtup_datname_callback(const void *v1, const void *v2)
 int
 sort_dbtup_deleted_callback(const void *v1, const void *v2)
 {
-	struct dbtup_t *n1, *n2;
+	struct dbtup_t *n1,
+			   *n2;
+
 	n1 = (struct dbtup_t *) v1;
 	n2 = (struct dbtup_t *) v2;
 
@@ -318,7 +354,9 @@ sort_dbtup_deleted_callback(const void *v1, const void *v2)
 int
 sort_dbtup_fetched_callback(const void *v1, const void *v2)
 {
-	struct dbtup_t *n1, *n2;
+	struct dbtup_t *n1,
+			   *n2;
+
 	n1 = (struct dbtup_t *) v1;
 	n2 = (struct dbtup_t *) v2;
 
@@ -333,7 +371,9 @@ sort_dbtup_fetched_callback(const void *v1, const void *v2)
 int
 sort_dbtup_inserted_callback(const void *v1, const void *v2)
 {
-	struct dbtup_t *n1, *n2;
+	struct dbtup_t *n1,
+			   *n2;
+
 	n1 = (struct dbtup_t *) v1;
 	n2 = (struct dbtup_t *) v2;
 
@@ -348,7 +388,9 @@ sort_dbtup_inserted_callback(const void *v1, const void *v2)
 int
 sort_dbtup_returned_callback(const void *v1, const void *v2)
 {
-	struct dbtup_t *n1, *n2;
+	struct dbtup_t *n1,
+			   *n2;
+
 	n1 = (struct dbtup_t *) v1;
 	n2 = (struct dbtup_t *) v2;
 
@@ -363,7 +405,9 @@ sort_dbtup_returned_callback(const void *v1, const void *v2)
 int
 sort_dbtup_updated_callback(const void *v1, const void *v2)
 {
-	struct dbtup_t *n1, *n2;
+	struct dbtup_t *n1,
+			   *n2;
+
 	n1 = (struct dbtup_t *) v1;
 	n2 = (struct dbtup_t *) v2;
 

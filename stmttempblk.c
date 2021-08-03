@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -23,40 +23,53 @@ struct stmttempblk_t
 {
 	RB_ENTRY(stmttempblk_t) entry;
 
-	char queryid[NAMEDATALEN+1];
-	int64_t rows;
-	int64_t temp_blks_read;
-	int64_t temp_blks_written;
-	double blk_read_time;
-	double blk_write_time;
+	char		queryid[NAMEDATALEN + 1];
+	int64_t		rows;
+	int64_t		temp_blks_read;
+	int64_t		temp_blks_written;
+	double		blk_read_time;
+	double		blk_write_time;
 
 };
 
-int stmttempblk_cmp(struct stmttempblk_t *, struct stmttempblk_t *);
+int			stmttempblk_cmp(struct stmttempblk_t *, struct stmttempblk_t *);
 static void stmttempblk_info(void);
-void print_stmttempblk(void);
-int read_stmttempblk(void);
-int select_stmttempblk(void);
-void sort_stmttempblk(void);
-int sort_stmttempblk_queryid_callback(const void *, const void *);
-int sort_stmttempblk_rows_callback(const void *, const void *);
-int sort_stmttempblk_temp_blks_read_callback(const void *, const void *);
-int sort_stmttempblk_temp_blks_written_callback(const void *, const void *);
-int sort_stmttempblk_blk_read_time_callback(const void *, const void *);
-int sort_stmttempblk_blk_write_time_callback(const void *, const void *);
+void		print_stmttempblk(void);
+int			read_stmttempblk(void);
+int			select_stmttempblk(void);
+void		sort_stmttempblk(void);
+int			sort_stmttempblk_queryid_callback(const void *, const void *);
+int			sort_stmttempblk_rows_callback(const void *, const void *);
+int			sort_stmttempblk_temp_blks_read_callback(const void *, const void *);
+int			sort_stmttempblk_temp_blks_written_callback(const void *, const void *);
+int			sort_stmttempblk_blk_read_time_callback(const void *, const void *);
+int			sort_stmttempblk_blk_write_time_callback(const void *, const void *);
 
 RB_HEAD(stmttempblk, stmttempblk_t) head_stmttempblks =
-    RB_INITIALIZER(&head_stmttempblks);
+RB_INITIALIZER(&head_stmttempblks);
 RB_PROTOTYPE(stmttempblk, stmttempblk_t, entry, stmttempblk_cmp)
 RB_GENERATE(stmttempblk, stmttempblk_t, entry, stmttempblk_cmp)
 
-field_def fields_stmttempblk[] = {
-	{ "QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "ROWS", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TEMP_BLK_READ", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "TEMP_BLK_WRITTEN", 17, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "BLK_READ_TIME", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "BLK_WRITE_TIME", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_stmttempblk[] =
+{
+	{
+		"QUERYID", 8, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"ROWS", 5, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TEMP_BLK_READ", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"TEMP_BLK_WRITTEN", 17, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"BLK_READ_TIME", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"BLK_WRITE_TIME", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_STMT_QUERYID        FIELD_ADDR(fields_stmttempblk, 0)
@@ -67,17 +80,17 @@ field_def fields_stmttempblk[] = {
 #define FLD_STMT_BLK_WRITE_TIME FIELD_ADDR(fields_stmttempblk, 5)
 
 /* Define views */
-field_def *view_stmttempblk_0[] = {
+field_def  *view_stmttempblk_0[] = {
 	FLD_STMT_QUERYID, FLD_STMT_ROWS, FLD_STMT_TEMP_BLKS_READ,
 	FLD_STMT_TEMP_BLKS_WRITTEN, FLD_STMT_BLK_READ_TIME, FLD_STMT_BLK_WRITE_TIME, NULL
 };
 
-order_type stmttempblk_order_list[] = {
+order_type	stmttempblk_order_list[] = {
 	{"queryid", "queryid", 'u', sort_stmttempblk_queryid_callback},
 	{"rows", "rows", 'r', sort_stmttempblk_rows_callback},
 	{"temp_blk_read", "temp_blk_read", 'e', sort_stmttempblk_temp_blks_read_callback},
 	{"temp_blk_written", "temp_blk_written", 'w',
-			sort_stmttempblk_temp_blks_written_callback},
+	sort_stmttempblk_temp_blks_written_callback},
 	{"blk_read_time", "blk_read_time", 'a', sort_stmttempblk_blk_read_time_callback},
 	{"blk_write_time", "blk_write_time", 'i', sort_stmttempblk_blk_write_time_callback},
 	{NULL, NULL, 0, NULL}
@@ -90,46 +103,54 @@ struct view_manager stmttempblk_mgr = {
 	stmttempblk_order_list
 };
 
-field_view views_stmttempblk[] = {
-	{ view_stmttempblk_0, "stmttempblk", 'P', &stmttempblk_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_stmttempblk[] = {
+	{view_stmttempblk_0, "stmttempblk", 'P', &stmttempblk_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int stmttempblk_exist = 1;
-int	stmttempblk_count;
+int			stmttempblk_exist = 1;
+int			stmttempblk_count;
 struct stmttempblk_t *stmttempblks;
 
 static void
 stmttempblk_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct stmttempblk_t *n, *p;
+	struct stmttempblk_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_STMT_EXIST);
-		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0) {
+		if (PQresultStatus(pgresult) != PGRES_TUPLES_OK || PQntuples(pgresult) == 0)
+		{
 			stmttempblk_exist = 0;
 			PQclear(pgresult);
 			return;
 		}
 
 		pgresult = PQexec(options.connection, QUERY_STAT_TEMP_BLK);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = stmttempblk_count;
 			stmttempblk_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (stmttempblk_count > i) {
+	if (stmttempblk_count > i)
+	{
 		p = reallocarray(stmttempblks, stmttempblk_count,
-				sizeof(struct stmttempblk_t));
-		if (p == NULL) {
+						 sizeof(struct stmttempblk_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -139,9 +160,11 @@ stmttempblk_info(void)
 		stmttempblks = p;
 	}
 
-	for (i = 0; i < stmttempblk_count; i++) {
+	for (i = 0; i < stmttempblk_count; i++)
+	{
 		n = malloc(sizeof(struct stmttempblk_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -150,7 +173,8 @@ stmttempblk_info(void)
 		}
 		strncpy(n->queryid, PQgetvalue(pgresult, i, 0), NAMEDATALEN);
 		p = RB_INSERT(stmttempblk, &head_stmttempblks, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -171,7 +195,7 @@ stmttempblk_info(void)
 int
 stmttempblk_cmp(struct stmttempblk_t *e1, struct stmttempblk_t *e2)
 {
-  return (e1->queryid< e2->queryid ? -1 : e1->queryid > e2->queryid);
+	return (e1->queryid < e2->queryid ? -1 : e1->queryid > e2->queryid);
 }
 
 int
@@ -191,44 +215,49 @@ read_stmttempblk(void)
 int
 initstmttempblk(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	stmttempblks = NULL;
 	stmttempblk_count = 0;
 
 	read_stmttempblk();
-	if(stmttempblk_exist == 0){
+	if (stmttempblk_exist == 0)
+	{
 		return 0;
 	}
 
 	for (v = views_stmttempblk; v->name != NULL; v++)
 		add_view(v);
 
-	return(1);
+	return (1);
 }
 
 void
 print_stmttempblk(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < stmttempblk_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < stmttempblk_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_STMT_QUERYID, stmttempblks[i].queryid);
-            			print_fld_uint(FLD_STMT_ROWS, stmttempblks[i].rows);
+				print_fld_uint(FLD_STMT_ROWS, stmttempblks[i].rows);
 				print_fld_uint(FLD_STMT_TEMP_BLKS_READ,
-						stmttempblks[i].temp_blks_read);
+							   stmttempblks[i].temp_blks_read);
 				print_fld_uint(FLD_STMT_TEMP_BLKS_WRITTEN,
-						stmttempblks[i].temp_blks_written);
+							   stmttempblks[i].temp_blks_written);
 				print_fld_float(FLD_STMT_BLK_READ_TIME,
-						stmttempblks[i].blk_read_time,2);
+								stmttempblks[i].blk_read_time, 2);
 				print_fld_float(FLD_STMT_BLK_WRITE_TIME,
-						stmttempblks[i].blk_write_time,2);
+								stmttempblks[i].blk_write_time, 2);
 				end_line();
 			}
 			if (++cur >= end)
@@ -236,7 +265,8 @@ print_stmttempblk(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -264,13 +294,15 @@ sort_stmttempblk(void)
 		return;
 
 	mergesort(stmttempblks, stmttempblk_count, sizeof(struct stmttempblk_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_stmttempblk_queryid_callback(const void *v1, const void *v2)
 {
-	struct stmttempblk_t *n1, *n2;
+	struct stmttempblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmttempblk_t *) v1;
 	n2 = (struct stmttempblk_t *) v2;
 
@@ -280,7 +312,9 @@ sort_stmttempblk_queryid_callback(const void *v1, const void *v2)
 int
 sort_stmttempblk_rows_callback(const void *v1, const void *v2)
 {
-	struct stmttempblk_t *n1, *n2;
+	struct stmttempblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmttempblk_t *) v1;
 	n2 = (struct stmttempblk_t *) v2;
 
@@ -295,7 +329,9 @@ sort_stmttempblk_rows_callback(const void *v1, const void *v2)
 int
 sort_stmttempblk_temp_blks_read_callback(const void *v1, const void *v2)
 {
-	struct stmttempblk_t *n1, *n2;
+	struct stmttempblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmttempblk_t *) v1;
 	n2 = (struct stmttempblk_t *) v2;
 
@@ -310,7 +346,9 @@ sort_stmttempblk_temp_blks_read_callback(const void *v1, const void *v2)
 int
 sort_stmttempblk_temp_blks_written_callback(const void *v1, const void *v2)
 {
-	struct stmttempblk_t *n1, *n2;
+	struct stmttempblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmttempblk_t *) v1;
 	n2 = (struct stmttempblk_t *) v2;
 
@@ -325,7 +363,9 @@ sort_stmttempblk_temp_blks_written_callback(const void *v1, const void *v2)
 int
 sort_stmttempblk_blk_read_time_callback(const void *v1, const void *v2)
 {
-	struct stmttempblk_t *n1, *n2;
+	struct stmttempblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmttempblk_t *) v1;
 	n2 = (struct stmttempblk_t *) v2;
 
@@ -340,7 +380,9 @@ sort_stmttempblk_blk_read_time_callback(const void *v1, const void *v2)
 int
 sort_stmttempblk_blk_write_time_callback(const void *v1, const void *v2)
 {
-	struct stmttempblk_t *n1, *n2;
+	struct stmttempblk_t *n1,
+			   *n2;
+
 	n1 = (struct stmttempblk_t *) v1;
 	n2 = (struct stmttempblk_t *) v2;
 

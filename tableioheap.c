@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -22,40 +22,49 @@ struct tableio_heap_t
 {
 	RB_ENTRY(tableio_heap_t) entry;
 
-	long long relid;
-	char schemaname[NAMEDATALEN + 1];
-	char relname[NAMEDATALEN + 1];
+	long long	relid;
+	char		schemaname[NAMEDATALEN + 1];
+	char		relname[NAMEDATALEN + 1];
 
-	int64_t heap_blks_read;
-	int64_t heap_blks_read_diff;
-	int64_t heap_blks_read_old;
+	int64_t		heap_blks_read;
+	int64_t		heap_blks_read_diff;
+	int64_t		heap_blks_read_old;
 
-	int64_t heap_blks_hit;
-	int64_t heap_blks_hit_diff;
-	int64_t heap_blks_hit_old;
+	int64_t		heap_blks_hit;
+	int64_t		heap_blks_hit_diff;
+	int64_t		heap_blks_hit_old;
 };
 
-int tableio_heapcmp(struct tableio_heap_t *, struct tableio_heap_t *);
+int			tableio_heapcmp(struct tableio_heap_t *, struct tableio_heap_t *);
 static void tableio_heap_info(void);
-void print_tableio_heap(void);
-int read_tableio_heap(void);
-int select_tableio_heap(void);
-void sort_tableio_heap(void);
-int sort_tableio_heap_blks_hit_callback(const void *, const void *);
-int sort_tableio_heap_blks_read_callback(const void *, const void *);
-int sort_tableio_heap_relname_callback(const void *, const void *);
-int sort_tableio_heap_schemaname_callback(const void *, const void *);
+void		print_tableio_heap(void);
+int			read_tableio_heap(void);
+int			select_tableio_heap(void);
+void		sort_tableio_heap(void);
+int			sort_tableio_heap_blks_hit_callback(const void *, const void *);
+int			sort_tableio_heap_blks_read_callback(const void *, const void *);
+int			sort_tableio_heap_relname_callback(const void *, const void *);
+int			sort_tableio_heap_schemaname_callback(const void *, const void *);
 
 RB_HEAD(tableio_heap, tableio_heap_t) head_tableio_heaps =
-		RB_INITIALIZER(&head_tableio_heaps);
+RB_INITIALIZER(&head_tableio_heaps);
 RB_PROTOTYPE(tableio_heap, tableio_heap_t, entry, tableio_heapcmp)
 RB_GENERATE(tableio_heap, tableio_heap_t, entry, tableio_heapcmp)
 
-field_def fields_tableio_heap[] = {
-	{ "SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "NAME", 5, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "HEAP_BLKS_READ", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "HEAP_BLKS_HIT", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
+field_def fields_tableio_heap[] =
+{
+	{
+		"SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"NAME", 5, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"HEAP_BLKS_READ", 15, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"HEAP_BLKS_HIT", 14, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_TABLEIO_SCHEMA         FIELD_ADDR(fields_tableio_heap, 0)
@@ -64,18 +73,18 @@ field_def fields_tableio_heap[] = {
 #define FLD_TABLEIO_HEAP_BLKS_HIT  FIELD_ADDR(fields_tableio_heap, 3)
 
 /* Define views */
-field_def *view_tableio_heap_0[] = {
+field_def  *view_tableio_heap_0[] = {
 	FLD_TABLEIO_SCHEMA, FLD_TABLEIO_NAME, FLD_TABLEIO_HEAP_BLKS_READ,
 	FLD_TABLEIO_HEAP_BLKS_HIT, NULL
 };
 
-order_type tableio_heap_order_list[] = {
+order_type	tableio_heap_order_list[] = {
 	{"schema", "schema", 's', sort_tableio_heap_schemaname_callback},
 	{"name", "name", 'n', sort_tableio_heap_relname_callback},
 	{"heap_blks_read", "heap_blks_read", 'i',
-			sort_tableio_heap_blks_read_callback},
+	sort_tableio_heap_blks_read_callback},
 	{"heap_blks_hit", "heap_blks_hit", 'u',
-			sort_tableio_heap_blks_hit_callback},
+	sort_tableio_heap_blks_hit_callback},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -86,38 +95,45 @@ struct view_manager tableio_heap_mgr = {
 	tableio_heap_order_list, tableio_heap_order_list
 };
 
-field_view views_tableio_heap[] = {
-	{ view_tableio_heap_0, "tableioheap", 'U', &tableio_heap_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_tableio_heap[] = {
+	{view_tableio_heap_0, "tableioheap", 'U', &tableio_heap_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	tableio_heap_count;
+int			tableio_heap_count;
 struct tableio_heap_t *tableio_heaps;
 
 static void
 tableio_heap_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct tableio_heap_t *n, *p;
+	struct tableio_heap_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STATIO_TABLES_HEAP);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = tableio_heap_count;
 			tableio_heap_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (tableio_heap_count > i) {
+	if (tableio_heap_count > i)
+	{
 		p = reallocarray(tableio_heaps, tableio_heap_count,
-				sizeof(struct tableio_heap_t));
-		if (p == NULL) {
+						 sizeof(struct tableio_heap_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -127,9 +143,11 @@ tableio_heap_info(void)
 		tableio_heaps = p;
 	}
 
-	for (i = 0; i < tableio_heap_count; i++) {
+	for (i = 0; i < tableio_heap_count; i++)
+	{
 		n = malloc(sizeof(struct tableio_heap_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -138,7 +156,8 @@ tableio_heap_info(void)
 		}
 		n->relid = atoll(PQgetvalue(pgresult, i, 0));
 		p = RB_INSERT(tableio_heap, &head_tableio_heaps, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -184,7 +203,7 @@ read_tableio_heap(void)
 int
 inittableioheap(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	tableio_heaps = NULL;
 	tableio_heap_count = 0;
@@ -194,27 +213,31 @@ inittableioheap(void)
 
 	read_tableio_heap();
 
-	return(1);
+	return (1);
 }
 
 void
 print_tableio_heap(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < tableio_heap_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < tableio_heap_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_TABLEIO_SCHEMA, tableio_heaps[i].schemaname);
 				print_fld_str(FLD_TABLEIO_NAME, tableio_heaps[i].relname);
 				print_fld_uint(FLD_TABLEIO_HEAP_BLKS_READ,
-						tableio_heaps[i].heap_blks_read_diff);
+							   tableio_heaps[i].heap_blks_read_diff);
 				print_fld_uint(FLD_TABLEIO_HEAP_BLKS_HIT,
-						tableio_heaps[i].heap_blks_hit_diff);
+							   tableio_heaps[i].heap_blks_hit_diff);
 				end_line();
 			}
 			if (++cur >= end)
@@ -222,7 +245,8 @@ print_tableio_heap(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -250,13 +274,15 @@ sort_tableio_heap(void)
 		return;
 
 	mergesort(tableio_heaps, tableio_heap_count, sizeof(struct tableio_heap_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_tableio_heap_blks_read_callback(const void *v1, const void *v2)
 {
-	struct tableio_heap_t *n1, *n2;
+	struct tableio_heap_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_heap_t *) v1;
 	n2 = (struct tableio_heap_t *) v2;
 
@@ -271,7 +297,9 @@ sort_tableio_heap_blks_read_callback(const void *v1, const void *v2)
 int
 sort_tableio_heap_blks_hit_callback(const void *v1, const void *v2)
 {
-	struct tableio_heap_t *n1, *n2;
+	struct tableio_heap_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_heap_t *) v1;
 	n2 = (struct tableio_heap_t *) v2;
 
@@ -286,7 +314,9 @@ sort_tableio_heap_blks_hit_callback(const void *v1, const void *v2)
 int
 sort_tableio_heap_relname_callback(const void *v1, const void *v2)
 {
-	struct tableio_heap_t *n1, *n2;
+	struct tableio_heap_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_heap_t *) v1;
 	n2 = (struct tableio_heap_t *) v2;
 
@@ -301,7 +331,9 @@ sort_tableio_heap_relname_callback(const void *v1, const void *v2)
 int
 sort_tableio_heap_schemaname_callback(const void *v1, const void *v2)
 {
-	struct tableio_heap_t *n1, *n2;
+	struct tableio_heap_t *n1,
+			   *n2;
+
 	n1 = (struct tableio_heap_t *) v1;
 	n2 = (struct tableio_heap_t *) v2;
 

@@ -6,7 +6,7 @@
 #ifdef __linux__
 #include <bsd/stdlib.h>
 #include <bsd/sys/tree.h>
-#endif /* __linux__ */
+#endif							/* __linux__ */
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -24,45 +24,60 @@ struct tableanalyze_t
 {
 	RB_ENTRY(tableanalyze_t) entry;
 
-	long long relid;
-	char schemaname[NAMEDATALEN + 1];
-	char relname[NAMEDATALEN + 1];
+	long long	relid;
+	char		schemaname[NAMEDATALEN + 1];
+	char		relname[NAMEDATALEN + 1];
 
-	int64_t n_mod_since_analyze;
+	int64_t		n_mod_since_analyze;
 
-	char last_analyze[TIMESTAMPLEN + 1];
-	char last_autoanalyze[TIMESTAMPLEN + 1];
+	char		last_analyze[TIMESTAMPLEN + 1];
+	char		last_autoanalyze[TIMESTAMPLEN + 1];
 
-	int64_t analyze_count;
-	int64_t autoanalyze_count;
+	int64_t		analyze_count;
+	int64_t		autoanalyze_count;
 };
 
-int tableanalyzecmp(struct tableanalyze_t *, struct tableanalyze_t *);
+int			tableanalyzecmp(struct tableanalyze_t *, struct tableanalyze_t *);
 static void tableanalyze_info(void);
-void print_tableanalyze(void);
-int read_tableanalyze(void);
-int select_tableanalyze(void);
-void sort_tableanalyze(void);
-int sort_tableanalyze_n_mod_since_analyze_callback(const void *,
-		const void *);
-int sort_tableanalyze_relname_callback(const void *, const void *);
-int sort_tableanalyze_schemaname_callback(const void *, const void *);
-int sort_tableanalyze_analyze_count_callback(const void *, const void *);
-int sort_tableanalyze_autoanalyze_count_callback(const void *, const void *);
+void		print_tableanalyze(void);
+int			read_tableanalyze(void);
+int			select_tableanalyze(void);
+void		sort_tableanalyze(void);
+int			sort_tableanalyze_n_mod_since_analyze_callback(const void *,
+														   const void *);
+int			sort_tableanalyze_relname_callback(const void *, const void *);
+int			sort_tableanalyze_schemaname_callback(const void *, const void *);
+int			sort_tableanalyze_analyze_count_callback(const void *, const void *);
+int			sort_tableanalyze_autoanalyze_count_callback(const void *, const void *);
 
 RB_HEAD(tableanalyze, tableanalyze_t) head_tableanalyze =
-		RB_INITIALIZER(&head_tableanalyze);
+RB_INITIALIZER(&head_tableanalyze);
 RB_PROTOTYPE(tableanalyze, tableanalyze_t, entry, tableanalyzecmp)
 RB_GENERATE(tableanalyze, tableanalyze_t, entry, tableanalyzecmp)
 
-field_def fields_tableanalyze[] = {
-	{ "SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "NAME", 5, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "N_MOD", 6, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0 },
-	{ "LAST_ANALYZE", 13, 29, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "LAST_AUTOANALYZE", 17, 29, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "ANALYZE_COUNT", 14, 19, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
-	{ "AUTOANALYZE_COUNT", 18, 19, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0 },
+field_def fields_tableanalyze[] =
+{
+	{
+		"SCHEMA", 7, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"NAME", 5, NAMEDATALEN, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"N_MOD", 6, 19, 1, FLD_ALIGN_RIGHT, -1, 0, 0, 0
+	},
+	{
+		"LAST_ANALYZE", 13, 29, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"LAST_AUTOANALYZE", 17, 29, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"ANALYZE_COUNT", 14, 19, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
+	{
+		"AUTOANALYZE_COUNT", 18, 19, 1, FLD_ALIGN_LEFT, -1, 0, 0, 0
+	},
 };
 
 #define FLD_TABLEANALYZE_SCHEMA              FIELD_ADDR(fields_tableanalyze, 0)
@@ -74,22 +89,22 @@ field_def fields_tableanalyze[] = {
 #define FLD_TABLEANALYZE_AUTOANALYZE_COUNT   FIELD_ADDR(fields_tableanalyze, 6)
 
 /* Define views */
-field_def *view_tableanalyze_0[] = {
+field_def  *view_tableanalyze_0[] = {
 	FLD_TABLEANALYZE_SCHEMA, FLD_TABLEANALYZE_NAME,
 	FLD_TABLEANALYZE_N_MOD_SINCE_ANALYZE, FLD_TABLEANALYZE_LAST_ANALYZE,
 	FLD_TABLEANALYZE_LAST_AUTOANALYZE, FLD_TABLEANALYZE_ANALYZE_COUNT,
 	FLD_TABLEANALYZE_AUTOANALYZE_COUNT, NULL
 };
 
-order_type tableanalyze_order_list[] = {
+order_type	tableanalyze_order_list[] = {
 	{"schema", "schema", 's', sort_tableanalyze_schemaname_callback},
 	{"name", "name", 'n', sort_tableanalyze_relname_callback},
 	{"n_mod_since_analyze", "n_mod_since_analyze", 'm',
-			sort_tableanalyze_n_mod_since_analyze_callback},
+	sort_tableanalyze_n_mod_since_analyze_callback},
 	{"analyze_count", "analyze_count", 'v',
-			sort_tableanalyze_analyze_count_callback},
+	sort_tableanalyze_analyze_count_callback},
 	{"autoanalyze_count", "autoanalyze_count", 'V',
-			sort_tableanalyze_autoanalyze_count_callback},
+	sort_tableanalyze_autoanalyze_count_callback},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -100,38 +115,45 @@ struct view_manager tableanalyze_mgr = {
 	tableanalyze_order_list, tableanalyze_order_list
 };
 
-field_view views_tableanalyze[] = {
-	{ view_tableanalyze_0, "tableanalyze", 'T', &tableanalyze_mgr },
-	{ NULL, NULL, 0, NULL }
+field_view	views_tableanalyze[] = {
+	{view_tableanalyze_0, "tableanalyze", 'T', &tableanalyze_mgr},
+	{NULL, NULL, 0, NULL}
 };
 
-int	tableanalyze_count;
+int			tableanalyze_count;
 struct tableanalyze_t *tableanalyzes;
 
 static void
 tableanalyze_info(void)
 {
-	int i;
-	PGresult	*pgresult = NULL;
+	int			i;
+	PGresult   *pgresult = NULL;
 
-	struct tableanalyze_t *n, *p;
+	struct tableanalyze_t *n,
+			   *p;
 
 	connect_to_db();
-	if (options.connection != NULL) {
+	if (options.connection != NULL)
+	{
 		pgresult = PQexec(options.connection, QUERY_STAT_TABLES);
-		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK) {
+		if (PQresultStatus(pgresult) == PGRES_TUPLES_OK)
+		{
 			i = tableanalyze_count;
 			tableanalyze_count = PQntuples(pgresult);
 		}
-	} else {
+	}
+	else
+	{
 		error("Cannot connect to database");
 		return;
 	}
 
-	if (tableanalyze_count > i) {
+	if (tableanalyze_count > i)
+	{
 		p = reallocarray(tableanalyzes, tableanalyze_count,
-				sizeof(struct tableanalyze_t));
-		if (p == NULL) {
+						 sizeof(struct tableanalyze_t));
+		if (p == NULL)
+		{
 			error("reallocarray error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -141,9 +163,11 @@ tableanalyze_info(void)
 		tableanalyzes = p;
 	}
 
-	for (i = 0; i < tableanalyze_count; i++) {
+	for (i = 0; i < tableanalyze_count; i++)
+	{
 		n = malloc(sizeof(struct tableanalyze_t));
-		if (n == NULL) {
+		if (n == NULL)
+		{
 			error("malloc error");
 			if (pgresult != NULL)
 				PQclear(pgresult);
@@ -152,7 +176,8 @@ tableanalyze_info(void)
 		}
 		n->relid = atoll(PQgetvalue(pgresult, i, 0));
 		p = RB_INSERT(tableanalyze, &head_tableanalyze, n);
-		if (p != NULL) {
+		if (p != NULL)
+		{
 			free(n);
 			n = p;
 		}
@@ -198,7 +223,7 @@ read_tableanalyze(void)
 int
 inittableanalyze(void)
 {
-	field_view	*v;
+	field_view *v;
 
 	tableanalyzes = NULL;
 	tableanalyze_count = 0;
@@ -208,34 +233,38 @@ inittableanalyze(void)
 
 	read_tableanalyze();
 
-	return(1);
+	return (1);
 }
 
 void
 print_tableanalyze(void)
 {
-	int cur = 0, i;
-	int end = dispstart + maxprint;
+	int			cur = 0,
+				i;
+	int			end = dispstart + maxprint;
 
 	if (end > num_disp)
 		end = num_disp;
 
-	for (i = 0; i < tableanalyze_count; i++) {
-		do {
-			if (cur >= dispstart && cur < end) {
+	for (i = 0; i < tableanalyze_count; i++)
+	{
+		do
+		{
+			if (cur >= dispstart && cur < end)
+			{
 				print_fld_str(FLD_TABLEANALYZE_SCHEMA,
-						tableanalyzes[i].schemaname);
+							  tableanalyzes[i].schemaname);
 				print_fld_str(FLD_TABLEANALYZE_NAME, tableanalyzes[i].relname);
 				print_fld_uint(FLD_TABLEANALYZE_N_MOD_SINCE_ANALYZE,
-						tableanalyzes[i].n_mod_since_analyze);
+							   tableanalyzes[i].n_mod_since_analyze);
 				print_fld_str(FLD_TABLEANALYZE_LAST_ANALYZE,
-						tableanalyzes[i].last_analyze);
+							  tableanalyzes[i].last_analyze);
 				print_fld_str(FLD_TABLEANALYZE_LAST_AUTOANALYZE,
-						tableanalyzes[i].last_autoanalyze);
+							  tableanalyzes[i].last_autoanalyze);
 				print_fld_uint(FLD_TABLEANALYZE_ANALYZE_COUNT,
-						tableanalyzes[i].analyze_count);
+							   tableanalyzes[i].analyze_count);
 				print_fld_uint(FLD_TABLEANALYZE_AUTOANALYZE_COUNT,
-						tableanalyzes[i].autoanalyze_count);
+							   tableanalyzes[i].autoanalyze_count);
 				end_line();
 			}
 			if (++cur >= end)
@@ -243,7 +272,8 @@ print_tableanalyze(void)
 		} while (0);
 	}
 
-	do {
+	do
+	{
 		if (cur >= dispstart && cur < end)
 			end_line();
 		if (++cur >= end)
@@ -271,13 +301,15 @@ sort_tableanalyze(void)
 		return;
 
 	mergesort(tableanalyzes, tableanalyze_count, sizeof(struct tableanalyze_t),
-			ordering->func);
+			  ordering->func);
 }
 
 int
 sort_tableanalyze_n_mod_since_analyze_callback(const void *v1, const void *v2)
 {
-	struct tableanalyze_t *n1, *n2;
+	struct tableanalyze_t *n1,
+			   *n2;
+
 	n1 = (struct tableanalyze_t *) v1;
 	n2 = (struct tableanalyze_t *) v2;
 
@@ -292,7 +324,9 @@ sort_tableanalyze_n_mod_since_analyze_callback(const void *v1, const void *v2)
 int
 sort_tableanalyze_relname_callback(const void *v1, const void *v2)
 {
-	struct tableanalyze_t *n1, *n2;
+	struct tableanalyze_t *n1,
+			   *n2;
+
 	n1 = (struct tableanalyze_t *) v1;
 	n2 = (struct tableanalyze_t *) v2;
 
@@ -307,7 +341,9 @@ sort_tableanalyze_relname_callback(const void *v1, const void *v2)
 int
 sort_tableanalyze_schemaname_callback(const void *v1, const void *v2)
 {
-	struct tableanalyze_t *n1, *n2;
+	struct tableanalyze_t *n1,
+			   *n2;
+
 	n1 = (struct tableanalyze_t *) v1;
 	n2 = (struct tableanalyze_t *) v2;
 
@@ -322,7 +358,9 @@ sort_tableanalyze_schemaname_callback(const void *v1, const void *v2)
 int
 sort_tableanalyze_analyze_count_callback(const void *v1, const void *v2)
 {
-	struct tableanalyze_t *n1, *n2;
+	struct tableanalyze_t *n1,
+			   *n2;
+
 	n1 = (struct tableanalyze_t *) v1;
 	n2 = (struct tableanalyze_t *) v2;
 
@@ -337,7 +375,9 @@ sort_tableanalyze_analyze_count_callback(const void *v1, const void *v2)
 int
 sort_tableanalyze_autoanalyze_count_callback(const void *v1, const void *v2)
 {
-	struct tableanalyze_t *n1, *n2;
+	struct tableanalyze_t *n1,
+			   *n2;
+
 	n1 = (struct tableanalyze_t *) v1;
 	n2 = (struct tableanalyze_t *) v2;
 
